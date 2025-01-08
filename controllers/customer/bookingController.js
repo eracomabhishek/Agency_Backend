@@ -1,5 +1,6 @@
 const bookingService = require('../../services/bookingService');
-const Vehicle = require('../../models/Vehicle')
+const Vehicle = require('../../models/Vehicle');
+const Agency = require('../../models/Agency');
 
 class BOOKING {
     // Create a new booking
@@ -10,13 +11,17 @@ class BOOKING {
         const { customerId } = req.user; // Get customer ID from token
         req.body.customerId = customerId;
     
-        const { vehicleId, startDate, endDate, startHour, endHour } = req.body;
+        const { agencyId, vehicleId, startDate, endDate, startHour, endHour } = req.body;
     
         // Check if vehicle exists
         const vehicle = await Vehicle.findOne({ vehicleId });
         if (!vehicle) {
             return res.status(404).json({ message: "Vehicle not found." });
         }
+        const agency = await Agency.findOne({ agencyId });
+        if (!agency) {
+            return res.status(404).json({ message: "Agency not found." });
+            }
     
         // Check if all required fields are provided
         if (!startDate || !endDate || !startHour || !endHour) {

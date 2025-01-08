@@ -14,10 +14,10 @@ const BookingSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    // agencyId: {
-    //     type: Number,
-    //     required: true
-    // },
+    agencyId: {
+        type: Number,
+        required: true
+    },
     startDate: {
         type: Date,  
     },

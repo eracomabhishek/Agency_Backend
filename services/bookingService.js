@@ -10,12 +10,12 @@ class BOOKINGSERVICE {
     endDate,
     startHour,
     endHour,
-    // agencyId
+    agencyId
 }) {
     // Ensure that customerId, vehicleId, and agencyId are numbers
     const validCustomerId = Number(customerId);
     const validVehicleId = Number(vehicleId);
-    // const validAgencyId = Number(agencyId);
+    const validAgencyId = Number(agencyId);
 
     // Validate customer existence
     const customer = await Customer.findOne({ customerId: validCustomerId });
@@ -30,7 +30,7 @@ class BOOKINGSERVICE {
     const newBooking = new Booking({
         customerId: validCustomerId,
         vehicleId: validVehicleId,
-        // agencyId: validAgencyId,
+        agencyId: validAgencyId,
         customerName: customerName,
         customerNumber: customerNumber,
         startDate,
@@ -42,7 +42,7 @@ class BOOKINGSERVICE {
     });
 
     await newBooking.save();
-    
+
     // Update customer's booking history
     await Customer.findOneAndUpdate(
       { customerId: validCustomerId }, // Querying with the Number customerId
