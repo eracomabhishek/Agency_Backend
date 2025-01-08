@@ -12,7 +12,7 @@ class VEHICLE {
                     const requiredFields = ['vehicleName', 'vehicleType', 'pricePerDay', 'pricePerHour', 'capacity', 'description', 'features', 'availability'];
                     for (let field of requiredFields) {
                         if (!req.body[field]) {
-                            return res.status(400).json({ meaasge: `Please enter ${field}` });
+                            return res.status(400).json({ message: `Please enter ${field}` });
                         }
                     }
             
