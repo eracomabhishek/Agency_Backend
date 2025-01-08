@@ -26,22 +26,6 @@ class BOOKINGSERVICE {
     const customerName = customer.fullName;
     const customerNumber = customer.phoneNumber;
 
-    // Validate booking type
-    if (startHour || endHour) {
-        // Validate hourly booking
-        if (!startHour || !endHour || startHour >= endHour) {
-            throw new Error('Valid startHour and endHour must be provided for hourly bookings.');
-        }
-        if (new Date(startDate).toDateString() !== new Date(endDate).toDateString()) {
-            throw new Error('Start and end dates must be the same for hourly bookings.');
-        }
-    } else {
-        // Validate daily booking
-        if (new Date(startDate) >= new Date(endDate)) {
-            throw new Error('Start date must be before end date for daily bookings.');
-        }
-    }
-
     // Create a new booking
     const newBooking = new Booking({
         customerId: validCustomerId,
@@ -58,13 +42,7 @@ class BOOKINGSERVICE {
     });
 
     await newBooking.save();
-
-    // Update customer's booking history
-    // await Customer.findOneAndUpdate(
-    //     { customerId: validCustomerId }, 
-    //     { $push: { bookingHistory: newBooking._id } } 
-    // );
-
+    
     // Update customer's booking history
     await Customer.findOneAndUpdate(
       { customerId: validCustomerId }, // Querying with the Number customerId

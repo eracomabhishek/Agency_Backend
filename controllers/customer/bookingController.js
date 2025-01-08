@@ -3,84 +3,85 @@ const Vehicle = require('../../models/Vehicle')
 
 class BOOKING {
     // Create a new booking
-    async createBooking(req, res) {
-        try {
-            const { customerId } = req.user; 
-            req.body.customerId = customerId;
-    
-            const { vehicleId, startDate, endDate, startHour, endHour } = req.body;
-            const vehicle = await Vehicle.findOne({ vehicleId });
-            if (!vehicle) {
-                return res.status(404).json({ message: `Vehicle with ID ${vehicleId} not found.` });
-            }
-    
-            // Validate booking type
-            if (!startDate || !endDate) {
-                return res.status(400).json({ message: 'Start date and end date are required.' });
-            }
+  async createBooking(req, res) {
 
-           // Scenario 1: Booking for specific hours across days
-         if (startHour !== undefined || endHour !== undefined) {
-            if (new Date(startDate).toDateString() !== new Date(endDate).toDateString()) {
-                return res.status(400).json({
-                    message: 'Start date and end date must be the same for hourly bookings.'
-                });
-            }
 
-            // Ensure start date is in the future
-            if (new Date(startDate) < new Date()) {
-                return res.status(400).json({
-                    message: 'Start date must be in the future.'
-                });
+    try {
+        const { customerId } = req.user; // Get customer ID from token
+        req.body.customerId = customerId;
+    
+        const { vehicleId, startDate, endDate, startHour, endHour } = req.body;
+    
+        // Check if vehicle exists
+        const vehicle = await Vehicle.findOne({ vehicleId });
+        if (!vehicle) {
+            return res.status(404).json({ message: "Vehicle not found." });
+        }
+    
+        // Check if all required fields are provided
+        if (!startDate || !endDate || !startHour || !endHour) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+    
+        // Validate startDate and endDate - should not be in the past
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);  // Set time to 00:00:00 for today
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+    
+        if (startDateObj < today || endDateObj < today) {
+            return res.status(400).json({ message: 'Start date and end date must not be in the past.' });
+        }
+    
+        // Validate that startDate is not after endDate
+        if (startDateObj > endDateObj) {
+            return res.status(400).json({ message: 'Start date cannot be later than end date.' });
+        }
+    
+        // Validate startHour and endHour - must be valid hours (00-23) and minutes (00-59)
+        const startHourInt = parseInt(startHour);
+        const endHourInt = parseInt(endHour);
+        const isValidHour = (hour) => hour >= 0 && hour <= 23;
+        const isValidMinute = (minute) => minute >= 0 && minute <= 59;
+    
+        if (!isValidHour(startHourInt) || !isValidHour(endHourInt)) {
+            return res.status(400).json({ message: 'Start hour and end hour must be between 0 and 23.' });
+        }
+    
+        const startMinute = startHour.split(':')[1] || '00';
+        const endMinute = endHour.split(':')[1] || '00';
+    
+        if (!isValidMinute(startMinute) || !isValidMinute(endMinute)) {
+            return res.status(400).json({ message: 'Start minute and end minute must be between 00 and 59.' });
+        }
+    
+        // Additional validation for today: startHour cannot be in the past if startDate is today
+        if (startDateObj.toDateString() === today.toDateString()) {
+            const currentHour = today.getHours();
+            const currentMinute = today.getMinutes();
+    
+            const [startHourValue, startMinutesValue] = startHour.split(':').map(Number); // Renamed to avoid conflict
+            if (startHourValue < currentHour || (startHourValue === currentHour && startMinutesValue < currentMinute)) {
+                return res.status(400).json({ message: 'Start hour cannot be in the past when selecting today\'s date.' });
             }
         }
-        // Scenario 2: Booking for a range of days (no specific hours)
-        else if (new Date(startDate).toDateString() !== new Date(endDate).toDateString()) {
-            // Validate daily booking (startDate and endDate must be different for multi-day bookings)
-            if (new Date(startDate) >= new Date(endDate)) {
-                return res.status(400).json({
-                    message: 'Start date must be before end date for daily bookings.'
-                });
-            }
-
-            // Ensure start date is in the future
-            if (new Date(startDate) < new Date()) {
-                return res.status(400).json({
-                    message: 'Start date must be in the future.'
-                });
-            }
-        }
-        // Scenario 3: Booking for a single day
-        else if (new Date(startDate).toDateString() === new Date(endDate).toDateString()) {
-            // For a single-day booking, check if it's in the future
-            if (new Date(startDate) < new Date()) {
-                return res.status(400).json({
-                    message: 'Start date must be in the future.'
-                });
-            }
-
     
-                // Handle case where only start and end date are the same, and no specific hours are provided
-                // Single day bookings without specific hours are allowed.
-            } else {
-                return res.status(400).json({
-                    message: 'Invalid booking configuration.'
-                });
-            }
+        // Create booking using the service
+        const newBooking = await bookingService.createBookingService(req.body);
     
-            const newBooking = await bookingService.createBookingService(req.body);
-    
-            res.status(201).json({
-                message: 'Booking created successfully...',
-                data: newBooking,
-            });
-        } catch (error) {
-            // Handle errors
-            res.status(500).json({
-                message: error.message,
-            });
-        }
+        return res.status(201).json({
+            message: 'Booking created successfully.',
+            data: newBooking,
+        });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
     }
+    
+
+    
+    
+}
+
     
     
     
