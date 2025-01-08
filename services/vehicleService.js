@@ -5,6 +5,7 @@ const Booking = require('../models/Booking');
 class VEHICLESERVICE{
     async createVehicleService(data, files, agencyId) {
        
+        const { vehicleName, vehicleType, capacity, pricePerDay, pricePerHour, availability, features, description } = data;
 
         // Check if the agency exists
         const agency = await Agency.findOne({ agencyId });
@@ -12,6 +13,8 @@ class VEHICLESERVICE{
             throw new Error('Agency not found.');
         }
 
+          // Extract the file paths from files
+          const images = files.map((file) => file.path);
         // Create a new vehicle and include the agencyId and agencyName
         const vehicle = new Vehicle({
             agencyId,
@@ -33,20 +36,18 @@ class VEHICLESERVICE{
 
     async findVehicleByIdService(vehicleId) {
         if (!vehicleId) {
-            throw new Error('Vehicle ID is required.');
+            return null; // Return null for invalid vehicleId
         }
         try {
-            const vehicle = await Vehicle.findOne({ vehicleId });
-            if (!vehicle) {
-                throw new Error('Vehicle not found.');
-            }
-            return vehicle; // Return the vehicle document
+            const vehicle = await Vehicle.findOne({ vehicleId }); 
+            return vehicle || null; 
         } catch (error) {
             console.error('Error in findVehicleById service:', error.message);
-            throw error;
+            return null; 
         }
     }
-
+    
+    
     async getAllVehiclesService() {
         try {
             // Fetch all vehicles
@@ -65,7 +66,7 @@ class VEHICLESERVICE{
             return vehiclesWithAgencyDetails;
         } catch (error) {
             console.error('Error in getAllVehicles service:', error);
-            throw new Error('Error retrieving vehicles from the database');
+            return 'Error retrieving vehicles from the database';
         }
     }
 

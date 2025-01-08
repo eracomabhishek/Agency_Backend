@@ -11,18 +11,18 @@ class VEHICLE {
                     // Validate required fields
                     const requiredFields = ['vehicleName', 'vehicleType', 'pricePerDay', 'pricePerHour', 'capacity', 'description', 'features', 'availability'];
                     for (let field of requiredFields) {
-                        if (!data[field]) {
-                            return res.status(400).json({ meaasge: `The field ${field} is required.` });
+                        if (!req.body[field]) {
+                            return res.status(400).json({ meaasge: `Please enter ${field}` });
                         }
                     }
             
                     // Check if images were uploaded
+                    const files = req.files;
                     if (!files || files.length === 0) {
-                        throw new Error('At least one image is required.');
+                         return res.status(400).json({ message: 'At least one image is required.'});
                     }
             
-                    // Extract the file paths from files
-                    const images = files.map((file) => file.path);
+                  
             const savedVehicle = await vehicleService.createVehicleService(req.body, req.files, agencyId);
 
             res.status(201).json({
@@ -77,29 +77,31 @@ class VEHICLE {
     // Method to get vehicle by ID
     async getVehicleById(req, res) {
         const { vehicleId } = req.params;
-        // console.log("Requested Vehicle ID:", vehicleId);
     
         if (!vehicleId) {
             return res.status(400).json({ message: 'Vehicle ID is required.' });
         }
+    
         try {
+            // Call the service to find the vehicle by ID
             const vehicle = await vehicleService.findVehicleByIdService(vehicleId);
+    
             if (!vehicle) {
                 return res.status(404).json({ message: 'Vehicle not found.' });
             }
-
-            res.status(200).json({ message: 'Vehicle retrieved successfully.', data: vehicle });
-
+    
+            res.status(200).json({
+                message: 'Vehicle retrieved successfully.',
+                data: vehicle
+            });
         } catch (error) {
-            console.error('Error in getVehicleById controller:', error);
-            if (error.message === 'Vehicle not found.') {
-                // If the error is "Vehicle not found", return 404
-                return res.status(404).json({ message: 'Vehicle not found.'});
-            }
-            // For other errors, return 500
-            res.status(500).json({ message: error.message });
+            console.error('Error in getVehicleById controller:', error.message);
+    
+            // Return a generic error for unexpected cases
+            res.status(500).json({ message: 'An error occurred while retrieving the vehicle.' });
         }
     }
+    
     
 
     // Method to get vehicles by agency ID
