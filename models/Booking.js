@@ -14,25 +14,21 @@ const BookingSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    agencyId: {
-        type: Number,
-        required: true
-    },
+    // agencyId: {
+    //     type: Number,
+    //     required: true
+    // },
     startDate: {
-        type: Date,
-        
+        type: Date,  
     },
     endDate: {
-        type: Date,
-       
+        type: Date,  
     },
-    Days: {
-        type: Number,
-        
+    startHour: {
+        type: String,
     },
-    Hours: {
-        type: Number,
-        
+    endHour: {
+        type: String,
     },
     customerName: {
         type: String,

@@ -3,21 +3,21 @@ const Customer = require('../models/Customer');
 const Vehicle = require('../models/Vehicle');
 
 class BOOKINGSERVICE {
-  // Create a new booking
   async createBookingService({
     customerId,
     vehicleId,
     startDate,
     endDate,
-    Hours,
-    Days,
-    agencyId
-  }) {
+    startHour,
+    endHour,
+    // agencyId
+}) {
     // Ensure that customerId, vehicleId, and agencyId are numbers
     const validCustomerId = Number(customerId);
     const validVehicleId = Number(vehicleId);
-    const validAgencyId = Number(agencyId);
+    // const validAgencyId = Number(agencyId);
 
+    // Validate customer existence
     const customer = await Customer.findOne({ customerId: validCustomerId });
     if (!customer) {
         throw new Error('Customer not found');
@@ -26,30 +26,55 @@ class BOOKINGSERVICE {
     const customerName = customer.fullName;
     const customerNumber = customer.phoneNumber;
 
+    // Validate booking type
+    if (startHour || endHour) {
+        // Validate hourly booking
+        if (!startHour || !endHour || startHour >= endHour) {
+            throw new Error('Valid startHour and endHour must be provided for hourly bookings.');
+        }
+        if (new Date(startDate).toDateString() !== new Date(endDate).toDateString()) {
+            throw new Error('Start and end dates must be the same for hourly bookings.');
+        }
+    } else {
+        // Validate daily booking
+        if (new Date(startDate) >= new Date(endDate)) {
+            throw new Error('Start date must be before end date for daily bookings.');
+        }
+    }
+
+    // Create a new booking
     const newBooking = new Booking({
-      customerId: validCustomerId,
-      vehicleId: validVehicleId,
-      agencyId: validAgencyId,
-      customerName:customerName,
-      customerNumber:customerNumber,
-      startDate,
-      endDate,
-      Days: Days || null, // Optional field
-      Hours: Hours || null, // Optional field
-      paymentStatus: 'Pending',
-      bookingStatus: 'Confirmed'
+        customerId: validCustomerId,
+        vehicleId: validVehicleId,
+        // agencyId: validAgencyId,
+        customerName: customerName,
+        customerNumber: customerNumber,
+        startDate,
+        endDate,
+        startHour: startHour || null,
+        endHour: endHour || null,
+        paymentStatus: 'Pending',
+        bookingStatus: 'Confirmed'
     });
 
     await newBooking.save();
 
     // Update customer's booking history
+    // await Customer.findOneAndUpdate(
+    //     { customerId: validCustomerId }, 
+    //     { $push: { bookingHistory: newBooking._id } } 
+    // );
+
+    // Update customer's booking history
     await Customer.findOneAndUpdate(
       { customerId: validCustomerId }, // Querying with the Number customerId
-      { $push: { bookingHistory: newBooking.bookingId } } // Assuming bookingId is being set as a unique number
+      { $push: { bookingHistory: Number(newBooking.bookingId) } } // Convert _id to Number
     );
 
     return newBooking;
-  }
+}
+
+
 
   // Update booking status
   async updateBookingStatusService(bookingId, { bookingStatus, paymentStatus }) {
