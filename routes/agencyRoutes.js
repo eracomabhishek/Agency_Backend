@@ -14,6 +14,7 @@ router.get('/vehicle/options', paginationService.fetchOptions);
 router.post('/agencies', agencyController.createAgency);                        // create agency
 router.post('/loginAgency', agencyController.loginAgency);                      // login  agency
 router.post('/update/agency',verifyToken, agencyController.updateAgencyProfile); // update agency
+router.get('/agency-details',verifyToken, agencyController.getAgencyDetails);                             // get agency
 
 // Vehicle routes
 router.post('/create/vehicle', verifyToken, upload.array('images', 5), vehicleController.createVehicle); // create vehicle

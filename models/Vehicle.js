@@ -31,6 +31,10 @@ const VehicleSchema = new mongoose.Schema({
     type: String,
     default: "0",
   },
+  exceedCharges:{
+    type: Number,
+    default: 0,
+  },
   vehicleType: {
     type: String,
   },
@@ -71,71 +75,3 @@ const VehicleSchema = new mongoose.Schema({
 addPreSaveMiddleware(VehicleSchema, 'vehicle', 'vehicleId'); // 'vehicle' as the counter name
 
 module.exports = mongoose.model("Vehicle", VehicleSchema);
-
-
-
-
-
-
-
-
-
-
-// const mongoose = require("mongoose");
-
-// // Utility function to generate a registration number
-// const generateRegistrationNumber = () => {
-//   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // Allowed characters (uppercase and numbers)
-//   let registrationNumber = "";
-
-//   for (let i = 0; i < 10; i++) {
-//     const randomIndex = Math.floor(Math.random() * characters.length);
-//     registrationNumber += characters[randomIndex];
-//   }
-
-//   return registrationNumber;
-// };
-
-// const VehicleSchema = new mongoose.Schema({
-//   agencyUid: {  // Use agencyUid instead of agencyId
-//     type: String,
-//     required: true,  // Ensure every vehicle has the agency's unique UID
-//   },
-//   vehicleName: { 
-//     type: String, 
-//     required: true
-//   }, 
-//   vehicleNumber: {
-//     type: String,
-//     default:"0",
-//   },
-//   vehicleType: {
-//     type: String,
-//     // required: true,
-//   },
-//   agencyName: { 
-//     type: String, 
-//    // required: true // Make it required if always needed 
-//   },
-//   capacity:{
-//     type: String,
-//     // required:true,
-//   },
-//   description:{
-//     type:String,
-//     // required:true,
-//   },
-//   registrationNumber: {
-//     type: String,
-//     // required: true,
-//     // unique: true,
-//     default: generateRegistrationNumber, // Use the custom function for generating the registration number
-//   },
-//   pricePerDay: { type: Number, required: true },
-//   availability: { type: Boolean, default: true },
-//   features: [String], // e.g., ['AC', 'GPS', 'Automatic']
-//   images: [String], // Array of image URLs
-//   createdAt: { type: Date, default: Date.now },
-// });
-
-// module.exports = mongoose.model("Vehicle", VehicleSchema);
