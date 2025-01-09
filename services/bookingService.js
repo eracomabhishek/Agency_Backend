@@ -20,7 +20,7 @@ class BOOKINGSERVICE {
     // Validate customer existence
     const customer = await Customer.findOne({ customerId: validCustomerId });
     if (!customer) {
-        throw new Error('Customer not found');
+        return 'Customer not found';
     }
 
     const customerName = customer.fullName;
@@ -52,25 +52,19 @@ class BOOKINGSERVICE {
     return newBooking;
 }
 
-
-
   // Update booking status
   async updateBookingStatusService(bookingId, { bookingStatus, paymentStatus }) {
     const booking = await Booking.findOne({ bookingId: bookingId });
 
     if (!booking) {
-      throw new Error('Booking not found.');
+      return 'Booking not found.';
     }
-
     if (bookingStatus !== undefined) {
       booking.bookingStatus = bookingStatus;
     }
-
     if (paymentStatus !== undefined) {
       booking.paymentStatus = paymentStatus;
     }
-
-    // Save and return updated booking
     return await booking.save();
   }
 

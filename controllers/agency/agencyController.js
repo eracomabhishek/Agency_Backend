@@ -1,4 +1,5 @@
 const agencyService = require('../../services/agencyService');
+const Agency = require('../../models/Agency')
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
@@ -85,6 +86,23 @@ class AGENCY {
             res.status(400).json({ message: error.message });
         }
     }
+    async getAgencyDetails(req, res) {
+        try {
+          const agencyId = req.user.agencyId;
+          // Find the agency by ID, excluding the password field
+          const findAgency = await Agency.find({ agencyId: agencyId }).select('-password');
+      
+          if (!findAgency) {
+            return res.status(404).json({ message: 'Agency not found' });
+          }
+      
+          res.status(200).json({ data: findAgency });
+        } catch (error) {
+          console.error('Error fetching agency details:', error.message);
+          res.status(500).json({ message: 'Failed to fetch agency details', error: error.message });
+        }
+      }
+      
 }
 
 // Export an instance of the AgencyController

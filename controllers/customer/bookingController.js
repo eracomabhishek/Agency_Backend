@@ -5,8 +5,6 @@ const Agency = require('../../models/Agency');
 class BOOKING {
     // Create a new booking
   async createBooking(req, res) {
-
-
     try {
         const { customerId } = req.user; // Get customer ID from token
         req.body.customerId = customerId;
@@ -73,6 +71,9 @@ class BOOKING {
     
         // Create booking using the service
         const newBooking = await bookingService.createBookingService(req.body);
+        if(newBooking){
+            return res.status(201).json({ message: newBooking });
+        }
     
         return res.status(201).json({
             message: 'Booking created successfully.',
@@ -82,15 +83,7 @@ class BOOKING {
         return res.status(500).json({ message: error.message });
     }
     
-
-    
-    
-}
-
-    
-    
-    
-    
+  }
 
     // Update booking status
     async updateBookingStatus(req, res) {
@@ -100,11 +93,13 @@ class BOOKING {
 
             if (bookingStatus === undefined && paymentStatus === undefined) {
                 return res.status(400).json({
-                    message: 'At least one field (bookingStatus or paymentStatus) must be provided.',
+                    message: 'At least one field bookingStatus or paymentStatus must be provided.',
                 });
             }
-
             const updatedBooking = await bookingService.updateBookingStatusService(bookingId, req.body);
+            if(updatedBooking){
+                return res.status(200).json({ message: updatedBooking });
+            }
 
             res.status(200).json({
                 message: 'Booking updated successfully',
@@ -112,8 +107,7 @@ class BOOKING {
             });
         } catch (error) {
             res.status(500).json({
-                message: 'Error updating booking status',
-                error: error.message,
+                message: error.message,
             });
         }
     }
@@ -141,7 +135,6 @@ class BOOKING {
     async getAllBookings(req, res) {
         try {
             const bookings = await bookingService.getAllBookingsService();
-
             res.status(200).json({
                 message: 'All bookings fetched successfully',
                 data: bookings,
