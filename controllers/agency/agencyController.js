@@ -86,6 +86,7 @@ class AGENCY {
             res.status(400).json({ message: error.message });
         }
     }
+
     async getAgencyDetails(req, res) {
         try {
           const agencyId = req.user.agencyId;
@@ -101,7 +102,58 @@ class AGENCY {
           console.error('Error fetching agency details:', error.message);
           res.status(500).json({ message: 'Failed to fetch agency details', error: error.message });
         }
-      }
+   }
+
+   async getBookingCount(req, res) {
+    try {
+        const agencyId = req.user.agencyId;
+        console.log(`Fetching counts for agencyId: ${agencyId}`); // Debug log
+
+        const result = await agencyService.getBookingCountService(agencyId);
+
+        // Return the result to the frontend
+        return res.status(200).json({
+            message: 'Counts retrieved successfully',
+            data: result
+        });
+    } catch (error) {
+        console.error('Error in getBookingCount:', error); // Detailed error log
+        res.status(500).json({
+            message: 'Failed to fetch booking or vehicle counts',
+            error: error.message
+        });
+    }
+  }
+
+
+
+      async getBookingConfirmed(req, res) {
+        try {
+            const agencyId = req.user.agencyId;
+            const result = await agencyService.getBookingConfirmedService(agencyId);
+            if (typeof result === 'string') {
+                return res.status(400).json({ message: result }); 
+            }
+            return res.status(200).json({ pendingBookings: result });
+        } catch (error) {
+            console.error('Error fetching booking details:', error.message);
+            res.status(500).json({ message: 'Failed to fetch booking details', error: error.message });
+        }
+     }
+      async getBookingCancelled(req, res) {
+        try {
+            const agencyId = req.user.agencyId;
+            const result = await agencyService.getBookingCancelledService(agencyId);
+            if (typeof result === 'string') {
+                return res.status(400).json({ message: result }); 
+            }
+            return res.status(200).json({ pendingBookings: result });
+        } catch (error) {
+            console.error('Error fetching booking details:', error.message);
+            res.status(500).json({ message: 'Failed to fetch booking details', error: error.message });
+        }
+     }
+      
       
 }
 

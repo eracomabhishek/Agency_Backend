@@ -4,35 +4,43 @@ const Booking = require('../models/Booking');
 
 class VEHICLESERVICE{
     async createVehicleService(data, files, agencyId) {
-       
-        const { vehicleName, vehicleType, capacity, pricePerDay, pricePerHour, availability, features, description } = data;
-
+        const { vehicleName, vehicleType, capacity, pricePerDay, pricePerHour, availability, features, description, exceedCharges } = data;
+      
         // Check if the agency exists
         const agency = await Agency.findOne({ agencyId });
         if (!agency) {
-            throw new Error('Agency not found.');
+          return 'Agency not found.';
         }
-
-          // Extract the file paths from files
-          const images = files.map((file) => file.path);
+      
+        // Extract the file paths from files
+        const images = files.map((file) => file.path);
+      
         // Create a new vehicle and include the agencyId and agencyName
         const vehicle = new Vehicle({
-            agencyId,
-            agencyName: agency.agencyName,
-            vehicleName,
-            vehicleType,
-            capacity,
-            description,
-            pricePerDay,
-            pricePerHour,
-            availability: availability ?? true,
-            features: features || [],
-            images: images || [],
+          agencyId,
+          agencyName: agency.agencyName,
+          vehicleName,
+          vehicleType,
+          capacity,
+          description,
+          exceedCharges,
+          pricePerDay,
+          pricePerHour,
+          availability: availability ?? true,
+          features: features || [],
+          images: images || [],
         });
-
+      
         // Save the vehicle to the database
-        return await vehicle.save();
-    }
+        const savedVehicle = await vehicle.save();
+      
+        // Increment the totalVehicle count in the Agency schema
+        agency.totalVehicle = agency.totalVehicle + 1; 
+        await agency.save();
+      
+        return savedVehicle;
+      }
+      
 
     async findVehicleByIdService(vehicleId) {
         if (!vehicleId) {
@@ -138,6 +146,19 @@ class VEHICLESERVICE{
         }
         return deletedVehicle;
     }
+
+    async getTotalVehicleService(agencyId) {
+        try {
+          // Count the number of vehicles associated with the agencyId in the Vehicle collection
+          const vehicleCount = await Vehicle.countDocuments({ agencyId });
+          // Return only the totalVehicle count
+          return vehicleCount;
+        } catch (error) {
+          return `Error updating vehicle count: ${error.message}`; // Return error message if any
+        }
+      }
+      
+      
 }
 
 const vehicleService = new VEHICLESERVICE();

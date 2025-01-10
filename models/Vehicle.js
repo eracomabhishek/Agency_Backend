@@ -33,7 +33,6 @@ const VehicleSchema = new mongoose.Schema({
   },
   exceedCharges:{
     type: Number,
-    default: 0,
   },
   vehicleType: {
     type: String,

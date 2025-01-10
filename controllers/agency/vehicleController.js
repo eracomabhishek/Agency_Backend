@@ -6,10 +6,10 @@ class VEHICLE {
     async createVehicle(req, res) {
         try {
             const agencyId = req.user.agencyId; 
-             const { vehicleName, vehicleType, capacity, pricePerDay, pricePerHour, availability, features, description } = req.body;
+             const { vehicleName, vehicleType, capacity, pricePerDay, pricePerHour, availability, features, description, exceedCharges } = req.body;
             
                     // Validate required fields
-                    const requiredFields = ['vehicleName', 'vehicleType', 'pricePerDay', 'pricePerHour', 'capacity', 'description', 'features', 'availability'];
+                    const requiredFields = ['vehicleName', 'vehicleType', 'pricePerDay', 'pricePerHour', 'capacity', 'description', 'features', 'availability', 'exceedCharges'];
                     for (let field of requiredFields) {
                         if (!req.body[field]) {
                             return res.status(400).json({ message: `Please enter ${field}` });
@@ -24,6 +24,9 @@ class VEHICLE {
             
                   
             const savedVehicle = await vehicleService.createVehicleService(req.body, req.files, agencyId);
+            if (typeof savedVehicle === 'string') {
+                return res.status(400).json({ message: savedVehicle }); 
+            }
 
             res.status(201).json({
                 message: 'Vehicle created successfully',
@@ -102,7 +105,6 @@ class VEHICLE {
         }
     }
     
-    
 
     // Method to get vehicles by agency ID
     async getVehiclesByAgency(req, res) {
@@ -155,6 +157,41 @@ class VEHICLE {
             res.status(400).json({ message: error.message });
         }
     }
+
+    async getTotalVehicles(req, res) {
+        try {
+          const agencyId = req.user.agencyId; // Assuming agencyId is stored in `req.user`
+      
+          // Call the service to get the total vehicle count
+          const totalVehicleCount = await vehicleService.getTotalVehicleService(agencyId);
+      
+          // If an error message come in string
+          if (typeof totalVehicleCount === 'string') {
+            return res.status(400).json({ message: totalVehicleCount });
+          }
+      
+          // If no vehicles are found (vehicleCount is 0)
+          if (totalVehicleCount === 0) {
+            return res.status(200).json({
+              message: 'No vehicles found for this agency.',
+              totalVehicle: totalVehicleCount,
+            });
+          }
+      
+          // If vehicles are found, return the count
+          res.status(200).json({
+            message: 'Total vehicle count retrieved successfully.',
+            totalVehicle: totalVehicleCount,
+          });
+        } catch (error) {
+          console.error('Error retrieving vehicle count:', error.message);
+          res.status(500).json({
+            message: 'Failed to retrieve vehicle count',
+            error: error.message,
+          });
+        }
+    }
+      
 }
 
 // Export an instance of the VehicleController

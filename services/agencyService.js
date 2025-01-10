@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const Agency = require('../models/Agency');
+const Booking = require('../models/Booking');
 const validationUtils = require('../utils/validator');
 
 
@@ -79,6 +80,7 @@ class AGENCYSERVICE {
         const agency = new Agency(data);
         return agency.save();
     }
+      
 
     // Service to validate login data
     async validateLoginDataService(data) {
@@ -203,6 +205,100 @@ class AGENCYSERVICE {
 
         return updatedAgency; // Return the updated agency profile
     }
+
+    
+    // Service function
+    async getBookingCountService(agencyId) {
+    try {
+        const bookingCounts = await Booking.aggregate([
+            { $match: { agencyId: agencyId } }, // Match bookings for the given agencyId
+            {
+                $group: {
+                    _id: "$bookingStatus",
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+        const counts = {
+            pending: 0,
+            confirmed: 0,
+            cancelled: 0
+        };
+        // Populate counts object
+        bookingCounts.forEach(item => {
+            counts[item._id.toLowerCase()] = item.count;
+        });
+        const totalVehicles = await Booking.countDocuments({ agencyId: agencyId });
+        const agency = await Agency.findOne({ agencyId: agencyId });
+        
+        return {
+            totalVehicles,
+            agencyName: agency.agencyName,
+            bookingCounts: counts,
+        };
+    } catch (error) {
+        console.error('Error in getBookingCountService:', error); // Detailed error log
+        throw new Error('An error occurred while fetching booking or vehicle counts.');
+    }
+}
+
+
+
+// Controller function
+// async getBookingPending(req, res) {
+//     try {
+//         const agencyId = req.user.agencyId; // Extract agencyId from the authenticated user
+//         const { bookingId } = req.params; // Extract bookingId from request parameters
+
+//         // Validate bookingId presence
+//         if (!bookingId) {
+//             return res.status(400).json({ message: 'Booking ID is required' });
+//         }
+
+//         // Call the service to get pending bookings
+//         const result = await agencyService.getBookingPendingService(bookingId, agencyId);
+
+//         // Check the result and send appropriate response
+//         if (typeof result === 'string') {
+//             return res.status(400).json({ message: result }); // Error message from service
+//         }
+
+//         // Send pending bookings to the frontend
+//         return res.status(200).json({ pendingBookings: result });
+//     } catch (error) {
+//         console.error('Error fetching booking details:', error.message);
+//         res.status(500).json({ message: 'Failed to fetch booking details', error: error.message });
+//     }
+// }
+
+
+    // async getBookingConfirmedService(agencyId) {
+    //     try {
+    //         const confirmedBookings = await Booking.find({ agencyId: agencyId, bookingStatus: 'Confirmed' });
+    //         if (!confirmedBookings || confirmedBookings.length === 0) {
+    //             return 'No Confirmed bookings found for the given agency.';
+    //         }
+    //         return confirmedBookings;
+    //     } catch (error) {
+    //         console.error('Error fetching Confirmed bookings:', error.message);
+    //         throw new Error('An error occurred while fetching Confirmed bookings.');
+    //     }
+    // }
+
+    // async getBookingCancelledService(agencyId) {
+    //     try {
+    //         const cancelledBookings = await Booking.find({ agencyId: agencyId, bookingStatus: 'Cancelled' });
+    //         if (!cancelledBookings || cancelledBookings.length === 0) {
+    //             return 'No Cancelled bookings found for the given agency.';
+    //         }
+    //         return cancelledBookings;
+    //     } catch (error) {
+    //         console.error('Error fetching Cancelled bookings:', error.message);
+    //         throw new Error('An error occurred while fetching Cancelled bookings.');
+    //     }
+    // }
+
+
 }
 
 const agencyService = new AGENCYSERVICE();
