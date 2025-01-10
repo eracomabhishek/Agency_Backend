@@ -6,7 +6,7 @@ class VEHICLE {
     async createVehicle(req, res) {
         try {
             const agencyId = req.user.agencyId; 
-             const { vehicleName, vehicleType, capacity, pricePerDay, pricePerHour, availability, features, description } = req.body;
+             const { vehicleName, vehicleType, capacity, pricePerDay, pricePerHour, availability, features, description, exceedCharges } = req.body;
             
                     // Validate required fields
                     const requiredFields = ['vehicleName', 'vehicleType', 'pricePerDay', 'pricePerHour', 'capacity', 'description', 'features', 'availability'];

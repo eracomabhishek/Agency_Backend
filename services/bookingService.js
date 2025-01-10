@@ -37,8 +37,6 @@ class BOOKINGSERVICE {
         endDate,
         startHour: startHour || null,
         endHour: endHour || null,
-        paymentStatus: 'Pending',
-        bookingStatus: 'Confirmed'
     });
 
     await newBooking.save();
