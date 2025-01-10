@@ -221,7 +221,11 @@ class AGENCYSERVICE {
         ]);
         const counts = {
             pending: 0,
+<<<<<<< HEAD
             confirmed: 0,
+=======
+            completed: 0,
+>>>>>>> a8c44a470a833724b0cd1b5ec1387481bacdffd0
             cancelled: 0,
             approved: 0
         };

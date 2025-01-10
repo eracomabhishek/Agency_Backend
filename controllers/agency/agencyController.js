@@ -55,7 +55,6 @@ class AGENCY {
             const token = jwt.sign(
                 payload, 
                 process.env.JWT_SECRET,
-                { expiresIn: '1h' } 
             );
 
             // Respond with the token

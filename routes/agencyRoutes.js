@@ -16,8 +16,11 @@ router.post('/loginAgency', agencyController.loginAgency);                      
 router.post('/update/agency',verifyToken, agencyController.updateAgencyProfile); // update agency
 router.get('/agency-details',verifyToken, agencyController.getAgencyDetails);                             // get agency
 router.get('/booking-count', verifyToken, agencyController.getBookingCount);
+<<<<<<< HEAD
 router.post('/agency-forgot-password', agencyController.forgotPassword);
 router.post('/agency-reset-password', agencyController.resetPassword);
+=======
+>>>>>>> a8c44a470a833724b0cd1b5ec1387481bacdffd0
 // router.get('/booking-confirmed', verifyToken, agencyController.getBookingConfirmed);
 // router.get('/booking-cancelled', verifyToken, agencyController.getBookingCancelled);
 
