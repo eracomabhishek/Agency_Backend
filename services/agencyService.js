@@ -221,8 +221,9 @@ class AGENCYSERVICE {
         ]);
         const counts = {
             pending: 0,
-            confirmed: 0,
-            cancelled: 0
+            completed: 0,
+            cancelled: 0,
+            approved: 0
         };
         // Populate counts object
         bookingCounts.forEach(item => {

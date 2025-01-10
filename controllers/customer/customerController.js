@@ -1,5 +1,6 @@
 const customerService = require('../../services/customerService');
-const bookingService = require('../../services/bookingService')
+const bookingService = require('../../services/bookingService');
+const Customer = require('../../models/Customer');
 const jwt = require('jsonwebtoken');
 
 // Class-based controller
@@ -83,6 +84,24 @@ class CUSTOMER {
             });
         }
     }
+
+    async getCustomerDetails(req, res) {
+        try {
+          const customerId = req.user.customerId;
+          // Find the agency by ID, excluding the password field
+          const findCustomer = await Customer.find({ customerId: customerId }).select('-password');
+      
+          if (!findCustomer) {
+            return res.status(404).json({ message: 'Agency not found' });
+          }
+      
+          res.status(200).json({ data: findCustomer });
+        } catch (error) {
+          console.error('Error fetching agency details:', error.message);
+          res.status(500).json({ message: 'Failed to fetch agency details', error: error.message });
+        }
+   }
+
 }
 
 // Export an instance of the CustomerController
