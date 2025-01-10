@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { addPreSaveMiddleware } = require('./Counter'); // Import the helper function
+const { generateUniqueId } = require('./Counter'); 
 
 const CustomerSchema = new mongoose.Schema({
     customerId: { 
@@ -25,6 +25,14 @@ const CustomerSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    otp: {
+        type: String, // OTP will be a string
+        required: false
+    },
+    otpExpires: {
+        type: Date, // Expiration time for OTP
+        required: false
+    },
     address: {
         street: { type: String },
         city: { type: String },
@@ -44,8 +52,12 @@ const CustomerSchema = new mongoose.Schema({
    { timestamps: true }
 );
 
-// Apply the pre-save middleware for UID generation
-addPreSaveMiddleware(CustomerSchema, 'customer', 'customerId'); // 'customer' as the counter name
+
+
+// Apply the pre-save middleware to generate a unique customerId
+CustomerSchema.pre('save', function(next) {
+    generateUniqueId.call(this, 'customerId', next);
+});
 
 module.exports = mongoose.models.Customer || mongoose.model('Customer', CustomerSchema);
 

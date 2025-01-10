@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { addPreSaveMiddleware } = require('./Counter'); // Import the helper function
+const mongoose = require('mongoose'); 
+const { generateUniqueId } = require('./Counter'); 
 
 const generateRegistrationNumber = () => {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -70,7 +70,13 @@ const VehicleSchema = new mongoose.Schema({
   { timestamps: true }
 );
 
-// Apply the pre-save middleware for UID generation
-addPreSaveMiddleware(VehicleSchema, 'vehicle', 'vehicleId'); // 'vehicle' as the counter name
+
+ 
+
+VehicleSchema.pre('save', function (next) {
+  const field = 'vehicleId'; // The field to generate a unique ID for
+  generateUniqueId.call(this, field, next);
+});
+
 
 module.exports = mongoose.model("Vehicle", VehicleSchema);

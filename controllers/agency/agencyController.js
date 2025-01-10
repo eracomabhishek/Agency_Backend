@@ -1,7 +1,12 @@
+require('dotenv').config();
 const agencyService = require('../../services/agencyService');
 const Agency = require('../../models/Agency')
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const bcrypt = require('bcrypt');
+const { sendOtpEmail } = require('../../services/emailService');
+const { generateOtp } = require('../../utils/generateOtp');
+
+
 
 class AGENCY {
     // Method to create a new agency
@@ -125,35 +130,93 @@ class AGENCY {
     }
   }
 
-
-
-      async getBookingConfirmed(req, res) {
-        try {
-            const agencyId = req.user.agencyId;
-            const result = await agencyService.getBookingConfirmedService(agencyId);
-            if (typeof result === 'string') {
-                return res.status(400).json({ message: result }); 
-            }
-            return res.status(200).json({ pendingBookings: result });
-        } catch (error) {
-            console.error('Error fetching booking details:', error.message);
-            res.status(500).json({ message: 'Failed to fetch booking details', error: error.message });
-        }
-     }
-      async getBookingCancelled(req, res) {
-        try {
-            const agencyId = req.user.agencyId;
-            const result = await agencyService.getBookingCancelledService(agencyId);
-            if (typeof result === 'string') {
-                return res.status(400).json({ message: result }); 
-            }
-            return res.status(200).json({ pendingBookings: result });
-        } catch (error) {
-            console.error('Error fetching booking details:', error.message);
-            res.status(500).json({ message: 'Failed to fetch booking details', error: error.message });
-        }
-     }
+    //   async getBookingConfirmed(req, res) {
+    //     try {
+    //         const agencyId = req.user.agencyId;
+    //         const result = await agencyService.getBookingConfirmedService(agencyId);
+    //         if (typeof result === 'string') {
+    //             return res.status(400).json({ message: result }); 
+    //         }
+    //         return res.status(200).json({ pendingBookings: result });
+    //     } catch (error) {
+    //         console.error('Error fetching booking details:', error.message);
+    //         res.status(500).json({ message: 'Failed to fetch booking details', error: error.message });
+    //     }
+    //  }
+    //   async getBookingCancelled(req, res) {
+    //     try {
+    //         const agencyId = req.user.agencyId;
+    //         const result = await agencyService.getBookingCancelledService(agencyId);
+    //         if (typeof result === 'string') {
+    //             return res.status(400).json({ message: result }); 
+    //         }
+    //         return res.status(200).json({ pendingBookings: result });
+    //     } catch (error) {
+    //         console.error('Error fetching booking details:', error.message);
+    //         res.status(500).json({ message: 'Failed to fetch booking details', error: error.message });
+    //     }
+    //  }
       
+
+    async  forgotPassword(req, res) {
+        try {
+            const { contactEmail } = req.body;
+    
+            if (!contactEmail) {
+                return res.status(400).json({ message: 'Email is required' });
+            }
+            const user = await Agency.findOne({ contactEmail });
+            if (!user) {
+                return res.status(400).json({ message: 'Email not registered' });
+            }
+            // Generate an OTP and expiration time
+            const otp = generateOtp();
+            const otpExpires = Date.now() + 15 * 60 * 1000; 
+    
+            // Save the OTP and expiration time in the user's record
+            user.otp = otp;
+            user.otpExpires = otpExpires;
+            await user.save();
+    
+            // Send the OTP to the user's email
+            await sendOtpEmail(contactEmail, otp);
+    
+            return res.status(200).json({ message: 'OTP sent successfully to your email' });
+        } catch (error) {
+            console.error('Error in forgotPassword:', error);
+            return res.status(500).json({ message: 'Error sending OTP', error: error.message });
+        }
+    }
+    
+    // API to handle reset password (verify OTP and reset password)
+     async resetPassword(req, res) {
+        try {
+            const { contactEmail, otp, newPassword } = req.body;
+            if (!contactEmail || !otp || !newPassword) {
+                return res.status(400).json({ message: 'Email, OTP, and new password are required' });
+            }
+            // Find the user by email
+            const user = await Agency.findOne({ contactEmail });
+            if (!user) {
+                return res.status(400).json({ message: 'Email not registered' });
+            }
+            // Check if OTP is valid and hasn't expired
+            if (user.otp !== otp || user.otpExpires < Date.now()) {
+                return res.status(400).json({ message: 'Invalid or expired OTP' });
+            }
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            // Update password and clear OTP
+            user.password = hashedPassword;
+            user.otp = null;  
+            user.otpExpires = null;  
+            await user.save();
+    
+            return res.status(200).json({ message: ' Reset Password successfully reset' });
+        } catch (error) {
+            console.error('Error in resetPassword:', error);
+            return res.status(500).json({ message: 'Error resetting password', error: error.message });
+        }
+    }
       
 }
 

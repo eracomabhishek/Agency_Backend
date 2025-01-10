@@ -1,7 +1,10 @@
 const customerService = require('../../services/customerService');
-const bookingService = require('../../services/bookingService');
 const Customer = require('../../models/Customer');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const { sendOtpEmail } = require('../../services/emailService');
+const { generateOtp } = require('../../utils/generateOtp');
+
 
 // Class-based controller
 class CUSTOMER {
@@ -101,7 +104,71 @@ class CUSTOMER {
           console.error('Error fetching agency details:', error.message);
           res.status(500).json({ message: 'Failed to fetch agency details', error: error.message });
         }
-   }
+    }
+
+// ------------------------------------------------------------------------------------
+
+
+// API to handle forgot password (send OTP)
+async  forgotPassword(req, res) {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+        const user = await Customer.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'Email not registered' });
+        }
+        // Generate an OTP and expiration time
+        const otp = generateOtp();
+        const otpExpires = Date.now() + 15 * 60 * 1000; 
+
+        // Save the OTP and expiration time in the user's record
+        user.otp = otp;
+        user.otpExpires = otpExpires;
+        await user.save();
+
+        // Send the OTP to the user's email
+        await sendOtpEmail(email, otp);
+
+        return res.status(200).json({ message: 'OTP sent successfully to your email' });
+    } catch (error) {
+        console.error('Error in forgotPassword:', error);
+        return res.status(500).json({ message: 'Error sending OTP', error: error.message });
+    }
+}
+
+// API to handle reset password (verify OTP and reset password)
+ async resetPassword(req, res) {
+    try {
+        const { email, otp, newPassword } = req.body;
+        if (!email || !otp || !newPassword) {
+            return res.status(400).json({ message: 'Email, OTP, and new password are required' });
+        }
+        // Find the user by email
+        const user = await Customer.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'Email not registered' });
+        }
+        // Check if OTP is valid and hasn't expired
+        if (user.otp !== otp || user.otpExpires < Date.now()) {
+            return res.status(400).json({ message: 'Invalid or expired OTP' });
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        // Update password and clear OTP
+        user.password = hashedPassword;
+        user.otp = null;  // Clear the OTP
+        user.otpExpires = null;  // Clear OTP expiration time
+        await user.save();
+
+        return res.status(200).json({ message: 'Password successfully reset' });
+    } catch (error) {
+        console.error('Error in resetPassword:', error);
+        return res.status(500).json({ message: 'Error resetting password', error: error.message });
+    }
+}
 
 }
 

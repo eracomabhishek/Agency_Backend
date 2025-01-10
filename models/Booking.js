@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const { addPreSaveMiddleware } = require('./Counter'); // Import the helper function
+// const { addPreSaveMiddleware } = require('./Counter'); // Import the helper function
+const { generateUniqueId } = require('./Counter'); 
 
 const BookingSchema = new mongoose.Schema({
     bookingId: { 
@@ -46,18 +47,19 @@ const BookingSchema = new mongoose.Schema({
         enum: ['Approved', 'Pending', 'Cancelled', 'Confirmed'], // Restrict to specific values
         default: 'Pending' // Default status
     },
-    // createdAt: {
-    //     type: Date,
-    //     default: Date.now
-    // }
+   
  }, 
     { 
      timestamps: true
     }
 );
 
+BookingSchema.pre('save', function(next) {
+    generateUniqueId.call(this, 'bookingId', next);
+  });
+
 // Apply the pre-save middleware for UID generation
-addPreSaveMiddleware(BookingSchema, 'booking', 'bookingId'); // 'booking' as the counter name
+// addPreSaveMiddleware(BookingSchema, 'booking', 'bookingId'); // 'booking' as the counter name
 
 module.exports = mongoose.model('Booking', BookingSchema);
 

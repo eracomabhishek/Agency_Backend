@@ -144,6 +144,14 @@ class VEHICLESERVICE{
         if (!deletedVehicle) {
             throw new Error('Vehicle not found.');
         }
+
+        const agency = await Agency.findOne({ agencyId: deletedVehicle.agencyId }); 
+        
+        if (agency) {
+            agency.totalVehicle -= 1; // Decrease the vehicle count
+            await agency.save(); // Save the updated agency document
+        }
+
         return deletedVehicle;
     }
 

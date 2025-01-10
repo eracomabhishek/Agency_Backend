@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const { addPreSaveMiddleware } = require('./Counter');
+// const { addPreSaveMiddleware } = require('./Counter');
+const { generateUniqueId } = require('./Counter'); 
 
 const BillingSchema = new mongoose.Schema({
     billingId:{
@@ -53,6 +54,10 @@ const BillingSchema = new mongoose.Schema({
   { timestamps: true }
 );
 
-addPreSaveMiddleware(BillingSchema, 'Billing', 'billingId');
+
+BillingSchema.pre('save', function(next) {
+    generateUniqueId.call(this, 'billingId', next);
+  });
+// addPreSaveMiddleware(BillingSchema, 'Billing', 'billingId');
 
 module.exports = mongoose.model("Billing", BillingSchema);
