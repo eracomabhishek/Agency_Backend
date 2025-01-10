@@ -15,8 +15,12 @@ router.post('/agencies', agencyController.createAgency);                        
 router.post('/loginAgency', agencyController.loginAgency);                      // login  agency
 router.post('/update/agency',verifyToken, agencyController.updateAgencyProfile); // update agency
 router.get('/agency-details',verifyToken, agencyController.getAgencyDetails);                             // get agency
+router.get('/booking-count', verifyToken, agencyController.getBookingCount);
+// router.get('/booking-confirmed', verifyToken, agencyController.getBookingConfirmed);
+// router.get('/booking-cancelled', verifyToken, agencyController.getBookingCancelled);
 
 // Vehicle routes
+router.get('/total-vehicle', verifyToken, vehicleController.getTotalVehicles);
 router.post('/create/vehicle', verifyToken, upload.array('images', 5), vehicleController.createVehicle); // create vehicle
 router.get('/get-all-vehicles', vehicleController.getVehicles);                       // Fetch all Vehicles with Agency name and id
 router.get('/get-vehicle-By/:vehicleId', vehicleController.getVehicleById);           // get vehicle by id

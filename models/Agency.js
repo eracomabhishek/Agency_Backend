@@ -19,6 +19,7 @@ const AgencySchema = new mongoose.Schema({
     status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
     password: { type: String, required: true },
     registeredAt: { type: Date, default: Date.now },
+    totalVehicle:{ type: Number, default: 0 },
 },
   { timestamps: true }
 );

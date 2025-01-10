@@ -36,22 +36,24 @@ const BookingSchema = new mongoose.Schema({
     customerNumber:{
         type:String,
     },
-    paymentStatus: {
-        type: String,
-        enum: ['Pending', 'Paid', 'Cancelled'],
-        default: 'Pending'
-    },
+    // paymentStatus: {
+    //     type: String,
+    //     enum: ['Pending', 'Paid', 'Cancelled'],
+    //     default: 'Pending'
+    // },
     bookingStatus: {
         type: String,
         enum: ['Completed', 'Pending', 'Cancelled', 'Approved'],
         default: 'Pending'
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+    // createdAt: {
+    //     type: Date,
+    //     default: Date.now
+    // }
  }, 
-   { timestamps: true }
+    { 
+     timestamps: true
+    }
 );
 
 // Apply the pre-save middleware for UID generation

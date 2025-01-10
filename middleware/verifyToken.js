@@ -11,8 +11,8 @@ const verifyToken = (req, res, next) => {
   }
   // console.log("token here", token)
   try {
-    const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);   //for production  
-    // const decoded = jwt.verify(token, process.env.JWT_SECRET);  // for postman
+    // const decoded = jwt.verify(token.split(' ')[1], process.env.JWT_SECRET);   //for production  
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);  // for postman
     req.user = decoded;  
     console.log("token middleware", req.user);
     next();  
