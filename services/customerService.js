@@ -82,7 +82,7 @@ class CUSTOMERSERVICE {
     const { email, password } = data;
 
     if (!email || !password) {
-      throw new Error("Email and password are required.");
+      return"Email and password are required.";
     }
   }
 
@@ -90,13 +90,13 @@ class CUSTOMERSERVICE {
   async authenticateCustomer(email, password) {
     const customer = await Customer.findOne({ email });
     if (!customer) {
-      throw new Error("Email not registered");
+       return "Email not registered";
     }
 
     // Compare the provided password with the hashed password
     const isMatch = await bcrypt.compare(password, customer.password);
     if (!isMatch) {
-      throw new Error("Incorrect password.");
+      return "Incorrect password.";
     }
 
     return customer;
@@ -134,22 +134,23 @@ class CUSTOMERSERVICE {
         return "Phone number is already in use.";
       }
     }
-
-     if (updatedData.address) {
-          customer.address = {
-            ...customer.address.toObject(), // Convert Mongoose subdocument to plain object
-            ...updatedData.address, // Merge with updated fields
-          };
+        // Merge the existing address with the updated address fields if address is provided
+        let updatedAddress = customer.address;
+        if (updatedData.address) {
+            updatedAddress = {
+                ...customer.address.toObject(), // Convert Mongoose subdocument to plain object
+                ...updatedData.address, // Merge with updated fields
+            };
         }
 
-    const updatedCustomer = await Customer.findOneAndUpdate(
+     const updatedCustomer = await Customer.findOneAndUpdate(
         { customerId: customerId },  // filter to find the customer by customerId
         { 
             $set: {
                 fullName: updatedData.fullName,
                 email: updatedData.email,
                 phoneNumber: updatedData.phoneNumber,
-                address: updatedData.address,  // Assuming address is passed in updatedData directly
+                address: updatedAddress,  // Assuming address is passed in updatedData directly
                 password: updatedData.password,
             }
         },  // fields to update
@@ -189,7 +190,7 @@ class CUSTOMERSERVICE {
     const bookings = await Booking.find({ customerId }).lean();
 
     if (!bookings || bookings.length === 0) {
-      throw new Error("No rented vehicles found.");
+      return "No rented vehicles found.";
     }
 
     // Fetch vehicle details for each booking

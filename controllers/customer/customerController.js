@@ -10,17 +10,12 @@ const { generateOtp } = require('../../utils/generateOtp');
 class CUSTOMER {
     // Method to register a new customer
     async registerCustomer(req, res) {
-        try {
-            const { fullName, email, phoneNumber, password, address } = data;
-
-            console.log("data", data)
-                
-            const validationError = await customerService.validateCustomerData(data);
+        try {            
+            const validationError = await customerService.validateCustomerData(req.body);
             if (validationError) {
                 return res.status(400).json({ message: validationError });
             }
-
-            const customer = await customerService.registerCustomerService(data);
+            const customer = await customerService.registerCustomerService(req.body);
             res.status(201).json({ success: true, data: customer });
         } catch (error) {           
             res.status(400).json({ message: error.message });
