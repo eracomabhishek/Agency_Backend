@@ -85,12 +85,10 @@ class AGENCYSERVICE {
     // Service to validate login data
     async validateLoginDataService(data) {
         const { contactEmail, password } = data;
-
         if (!contactEmail || !password) {
-            return 'Email and password are required.'; // Return a string error message
+            return 'Email and password are required.'; 
         }
-
-        return null; // Return null if no validation error
+        return null; 
     }
 
     // Service to authenticate the agency
@@ -120,42 +118,20 @@ class AGENCYSERVICE {
         if (!agency) {
             return 'Agency not found.';
         }
-
-        // Validate email if provided
-        if (updatedData.contactEmail) {
+       
+        // validate email
+        if (updatedData.contactEmail && updatedData.contactEmail !== agency.contactEmail) {
             if (!validationUtils.isValidEmail(updatedData.contactEmail)) {
                 return 'Invalid email format.';
             }
-
-            // Check if email already exists
             const existingEmail = await Agency.findOne({ contactEmail: updatedData.contactEmail });
             if (existingEmail && existingEmail._id.toString() !== agencyId) {
-                return 'Email is already in use.';
+                return 'Email is already in use by another agency.';
             }
         }
-
-        // Validate and handle password change logic
-        if (updatedData.oldPassword && updatedData.newPassword) {
-            if(!validationUtils.isValidPassword(updatedData.newPassword)){
-                return 'Invalid password format.';
-            }
-            const isMatch = await bcrypt.compare(updatedData.oldPassword, agency.password);
-            if (!isMatch) {
-                return 'Old password is incorrect.';
-            }
-
-            // Validate the new password
-            if (updatedData.newPassword.length < 6) {
-                return 'New password must be at least 6 characters long.';
-            }
-
-            // Hash the new password before saving it
-            const salt = await bcrypt.genSalt(10);
-            updatedData.password = await bcrypt.hash(updatedData.newPassword, salt);
-        }
-
+    
         // Validate phone number if provided
-        if (updatedData.phoneNumber) {
+        if (updatedData.phoneNumber && updatedData.phoneNumber !== agency.phoneNumber) {
             if (!validationUtils.isValidPhoneNumber(updatedData.phoneNumber)) {
                 return 'Invalid phone number format.';
             }
@@ -168,7 +144,7 @@ class AGENCYSERVICE {
         }
 
         // Validate business license number if provided and ensure it's unique
-        if (updatedData.businessLicenseNumber) {
+        if (updatedData.businessLicenseNumber && updatedData.businessLicenseNumber !== agency.businessLicenseNumber) {
             const existingLicense = await Agency.findOne({ businessLicenseNumber: updatedData.businessLicenseNumber });
             if (existingLicense && existingLicense._id.toString() !== agencyId) {
                 return 'Business License Number is already in use.';
@@ -176,34 +152,35 @@ class AGENCYSERVICE {
         }
 
         // Validate agency name if provided and ensure it's unique
-        if (updatedData.agencyName) {
+        if (updatedData.agencyName && updatedData.agencyName !== agency.agencyName) {
             const existingAgency = await Agency.findOne({ agencyName: updatedData.agencyName });
             if (existingAgency && existingAgency._id.toString() !== agencyId) {
                 return 'Agency name is already in use.';
             }
         }
 
-        // Update fields if they are present in the updatedData
-        if (updatedData.agencyName) agency.agencyName = updatedData.agencyName;
-        if (updatedData.contactPerson) agency.contactPerson = updatedData.contactPerson;
-        if (updatedData.contactEmail) agency.contactEmail = updatedData.contactEmail;
-        if (updatedData.phoneNumber) agency.phoneNumber = updatedData.phoneNumber;
-        if (updatedData.businessLicenseNumber) agency.businessLicenseNumber = updatedData.businessLicenseNumber;
-        
-        if (updatedData.officeAddress) {
-            agency.officeAddress = {
-                ...agency.officeAddress.toObject(), // Convert Mongoose subdocument to plain object
-                ...updatedData.officeAddress, // Merge with updated fields
-            };
-        }
+         // Use findOneAndUpdate to update the agency profile in a single operation
+        const updatedAgency = await Agency.findOneAndUpdate(
+        { agencyId: agencyId },  // filter to find the agency
+        { 
+            $set: {
+                agencyName: updatedData.agencyName,
+                contactPerson: updatedData.contactPerson,
+                contactEmail: updatedData.contactEmail,
+                phoneNumber: updatedData.phoneNumber,
+                businessLicenseNumber: updatedData.businessLicenseNumber,
+                officeAddress: updatedData.officeAddress,
+                serviceLocations: updatedData.serviceLocations,
+            }
+        },  // fields to update
+        { new: true }  // return the updated document
+    );
 
-        if (updatedData.serviceLocations) agency.serviceLocations = updatedData.serviceLocations;
-        if (updatedData.password) agency.password = updatedData.password;
+    if (!updatedAgency) {
+        return 'Agency update failed.';
+    }
 
-        // Save the updated agency document
-        const updatedAgency = await agency.save();
-
-        return updatedAgency; // Return the updated agency profile
+    return updatedAgency; // Return the updated agency profile
     }
 
     
@@ -221,11 +198,7 @@ class AGENCYSERVICE {
         ]);
         const counts = {
             pending: 0,
-<<<<<<< HEAD
             confirmed: 0,
-=======
-            completed: 0,
->>>>>>> a8c44a470a833724b0cd1b5ec1387481bacdffd0
             cancelled: 0,
             approved: 0
         };
@@ -243,10 +216,9 @@ class AGENCYSERVICE {
         };
     } catch (error) {
         console.error('Error in getBookingCountService:', error); // Detailed error log
-        throw new Error('An error occurred while fetching booking or vehicle counts.');
+        return 'An error occurred while fetching booking or vehicle counts.';
     }
 }
-
 
 
 // Controller function

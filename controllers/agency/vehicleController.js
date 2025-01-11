@@ -99,8 +99,6 @@ class VEHICLE {
             });
         } catch (error) {
             console.error('Error in getVehicleById controller:', error.message);
-    
-            // Return a generic error for unexpected cases
             res.status(500).json({ message: 'An error occurred while retrieving the vehicle.' });
         }
     }
@@ -191,6 +189,34 @@ class VEHICLE {
           });
         }
     }
+
+    async vehicleBookingPeriod(req, res) {
+        try {
+            const vehicleId = req.params.vehicleId;
+            console.log('Received vehicleId:', vehicleId);
+            if (!vehicleId) {
+                return res.status(400).json({ message: 'Vehicle ID is required.' });
+            }
+    
+            // Call the service to get the booking period
+            const bookingPeriod = await vehicleService.vehicleBookingPeriodService(vehicleId);
+    
+            // Check if bookingPeriod is a string (error message from service)
+            if (typeof bookingPeriod === 'string') {
+                return res.status(400).json({ message: bookingPeriod });
+            }
+    
+            // Respond with the booking period if found
+            res.status(200).json({
+                message: 'Vehicle booking period retrieved successfully.',
+                bookingPeriod: bookingPeriod
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: error.message });
+        }
+    }
+    
       
 }
 

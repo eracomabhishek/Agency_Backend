@@ -87,7 +87,7 @@ class AGENCY {
             });
         } catch (error) {
             console.error('Profile update error:', error.message);
-            res.status(400).json({ message: error.message });
+            res.status(500).json({ message: error.message });
         }
     }
 
@@ -114,7 +114,9 @@ class AGENCY {
         console.log(`Fetching counts for agencyId: ${agencyId}`); // Debug log
 
         const result = await agencyService.getBookingCountService(agencyId);
-
+        if (result) {
+            return res.status(400).json({ message: result });
+        }
         // Return the result to the frontend
         return res.status(200).json({
             message: 'Counts retrieved successfully',

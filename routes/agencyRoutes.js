@@ -16,11 +16,8 @@ router.post('/loginAgency', agencyController.loginAgency);                      
 router.post('/update/agency',verifyToken, agencyController.updateAgencyProfile); // update agency
 router.get('/agency-details',verifyToken, agencyController.getAgencyDetails);                             // get agency
 router.get('/booking-count', verifyToken, agencyController.getBookingCount);
-<<<<<<< HEAD
 router.post('/agency-forgot-password', agencyController.forgotPassword);
 router.post('/agency-reset-password', agencyController.resetPassword);
-=======
->>>>>>> a8c44a470a833724b0cd1b5ec1387481bacdffd0
 // router.get('/booking-confirmed', verifyToken, agencyController.getBookingConfirmed);
 // router.get('/booking-cancelled', verifyToken, agencyController.getBookingCancelled);
 
@@ -34,6 +31,7 @@ router.post('/vehicle/delete/:vehicleId', vehicleController.deleteVehicle);     
 router.post('/vehicles/update/:vehicleId', upload.array('images', 5), vehicleController.updateVehicle);           // update vehic    le
 // router.get('/get-vehicle/:', vehicleController.getVehicleByRegistrationNumber) // fetch vehicle by registration number
 router.get('/get-rented-Vehicle/:agencyId', vehicleController.getRentedVehicles);
+router.get('/vehicle-booking-period/:vehicleId', vehicleController.vehicleBookingPeriod);
 
 
 router.post('/billing', billingService.billing);

@@ -166,6 +166,25 @@ class VEHICLESERVICE{
         }
       }
       
+      async vehicleBookingPeriodService(vehicleId) {
+        try {
+            const findVehicle = await Booking.findOne({ vehicleId: vehicleId });
+            if (!findVehicle) {
+                return 'Vehicle not found in bookng period';
+            }
+    
+            // Destructure startDate and endDate from the found booking
+            const { startDate, endDate } = findVehicle;
+    
+            // Return the booking period (startDate and endDate)
+            return { startDate, endDate };
+    
+        } catch (error) {
+            console.error(error);
+            return 'Error fetching booking period';
+        }
+    }
+    
       
 }
 

@@ -75,7 +75,7 @@ class BOOKINGSERVICE {
     ]);
 
     if (!booking) {
-      throw new Error('Booking not found.');
+      return 'Booking not found.';
     }
 
     return booking;
@@ -83,59 +83,55 @@ class BOOKINGSERVICE {
 
   // Get all bookings
   async getAllBookingsService() {
-    return await Booking.find().populate('customerId').populate('vehicleId').populate('agencyId');
+    try {
+      const bookings = await Booking.find()
+        .populate('customerId')
+        .populate('vehicleId')
+        .populate('agencyId');
+      return bookings;
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      return 'Failed to retrieve bookings. Please try again later.';
+    }
   }
+  
 
   // Get booking details by date range
   async getBookingDetailsByDateService(startDate, endDate) {
-    console.log("Raw startDate:", startDate);
-    console.log("Raw endDate:", endDate);
+    try {
+        // Convert startDate and endDate to JavaScript Date objects
+        const start = new Date(startDate);
+        const end = new Date(endDate);
 
-    if (!startDate || !endDate) {
-      throw new Error('Both startDate and endDate are required.');
+        // Adjust to start of day and end of day in local time (no UTC offset)
+        const startOfDay = new Date(start);
+        startOfDay.setHours(0, 0, 0, 0); // Start of the day in local time
+
+        const endOfDay = new Date(end);
+        endOfDay.setHours(23, 59, 59, 999); // End of the day in local time
+
+        // MongoDB query to find bookings that overlap with the given date range
+        const query = {
+            $and: [
+                { startDate: { $lt: endOfDay } },  // Booking starts before or on the endDate
+                { endDate: { $gt: startOfDay } },  // Booking ends after or on the startDate
+            ],
+        };
+
+        // Execute the query and return bookings within the date range
+        const bookings = await Booking.find(query)
+            .populate('vehicleId', 'vehicleName agencyId')  // Populate vehicle info
+            .populate('agencyId', 'agencyName');            // Populate agency info
+
+        return bookings;  // Return the bookings if query is successful
+    } catch (error) {
+        console.error('Error retrieving bookings by date:', error);
+        return 'Failed to retrieve bookings. Please try again later.';  // Error handling
     }
+}
 
-    // Parse the start and end dates (ensure they are treated as local time)
-    const start = new Date(startDate);  // Treat as local time
-    const end = new Date(endDate);      // Treat as local time
 
-    if (isNaN(start) || isNaN(end)) {
-      throw new Error('Invalid date format. Use a valid date format (e.g., YYYY-MM-DD).');
-    }
-
-    if (start > end) {
-      throw new Error('startDate cannot be later than endDate.');
-    }
-
-    // Adjust to start of day and end of day in local time (no UTC offset)
-    const startOfDay = new Date(start); 
-    startOfDay.setHours(0, 0, 0, 0); // Start of the day in local time
-
-    const endOfDay = new Date(end); 
-    endOfDay.setHours(23, 59, 59, 999); // End of the day in local time
-
-    console.log("Adjusted Start Date (Local):", startOfDay);
-    console.log("Adjusted End Date (Local):", endOfDay);
-
-    // MongoDB query using local time, no UTC adjustment
-    const query = {
-      $and: [
-        { startDate: { $gte: startOfDay } }, // Greater than or equal to start date
-        { endDate: { $lte: endOfDay } }      // Less than or equal to end date
-      ]
-    };
-
-    console.log("MongoDB Query:", query);
-
-    // Execute query
-    const bookings = await Booking.find(query)
-      .populate('vehicleId', 'vehicleName agencyId')
-      .populate('agencyId', 'agencyName');
-
-    console.log("Retrieved Bookings:", bookings);
-
-    return bookings;
-  }
+  
 
 }
 
