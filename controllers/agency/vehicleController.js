@@ -1,4 +1,5 @@
 const vehicleService = require('../../services/vehicleService');
+const Vehicle = require('../../models/Vehicle');
 const jwt = require('jsonwebtoken'); 
 
 class VEHICLE {
@@ -33,7 +34,8 @@ class VEHICLE {
                 data: savedVehicle
             });
         } catch (error) {
-            res.status(400).json({ message: error.message });
+            console.error(error);
+            res.status(500).json({ message: 'An error occurred while adding vehicle.' });
         }
     }
 
@@ -60,7 +62,6 @@ class VEHICLE {
     async getRentedVehicles(req, res) {
         try {  
             const agencyId = req.params.agencyId;
-            // console.log("agency id", agencyId);
             const vehicles = await vehicleService.getRentedVehiclesService(agencyId);
             if (!vehicles || vehicles.length === 0) {
                 return res.status(404).json({ message: 'No Rented Vehicle' });
@@ -70,10 +71,8 @@ class VEHICLE {
                 data: vehicles 
             });
         } catch (error) {
-            console.error('Error fetching rented vehicles:', error);
-            res.status(500).json({ 
-                message: error.message 
-            });
+            console.error(error);
+            res.status(500).json({ message: 'Error while fetching rented vehicles' });
         }
     }
 
@@ -98,7 +97,7 @@ class VEHICLE {
                 data: vehicle
             });
         } catch (error) {
-            console.error('Error in getVehicleById controller:', error.message);
+            console.error(error);
             res.status(500).json({ message: 'An error occurred while retrieving the vehicle.' });
         }
     }
@@ -107,12 +106,14 @@ class VEHICLE {
     // Method to get vehicles by agency ID
     async getVehiclesByAgency(req, res) {
         try {
-            console.log("getting",req.params.agencyId)
             const agencyId = req.user.agencyId;
             const vehicles = await vehicleService.getVehiclesByAgencyService(agencyId);
+            if (typeof vehicles === 'string') {
+                return res.status(404).json({ message: vehicles });
+                };
             res.status(200).json({ message: 'Vehicles retrieved successfully', data: vehicles });
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            res.status(500).json({ message: 'An error occurred while retrieving the vehicle by agency' });
         }
     }
 
@@ -129,20 +130,20 @@ class VEHICLE {
     // Method to update vehicle
     async updateVehicle(req, res) {
         try {
-            console.log('Request body:', req.body); // To check the body content
-            console.log('Request files:', req.files); // To check the body files
+            const vehicleId = req.params.vehicleId;
+            const vehicle = await Vehicle.findOne({ vehicleId }); // Direct match for numeric vehicleId
+            if (!vehicle) {
+                return res.status(400).json({ message: 'Vehicle not found.' });
+            }
+            const updatedVehicle = await vehicleService.updateVehicleService(vehicleId, req.body, req.files);
+            if(typeof updatedVehicle === 'string'){
+                return res.status(404).json({ message: updatedVehicle });
+            }
 
-            const updatedVehicle = await vehicleService.updateVehicleService(req.params.vehicleId, req.body, req.files);
-
-            res.status(200).json({
-                message: 'Vehicle updated successfully',
-                data: updatedVehicle,
-            });
+            res.status(200).json({ message: 'Vehicle updated successfully', data: updatedVehicle });
         } catch (error) {
             console.error('Error updating vehicle:', error);
-            res.status(500).json({
-                message: error.message,
-            });
+            res.status(500).json({ message: 'An error occurred while updating the vehicle.' });
         }
     }
 
@@ -152,68 +153,46 @@ class VEHICLE {
             const deletedVehicle = await vehicleService.deleteVehicleService(req.params.vehicleId);
             res.status(200).json({ message: 'Vehicle deleted successfully', data: deletedVehicle });
         } catch (error) {
+            console.error(error);
             res.status(400).json({ message: error.message });
         }
     }
 
     async getTotalVehicles(req, res) {
         try {
-          const agencyId = req.user.agencyId; // Assuming agencyId is stored in `req.user`
-      
-          // Call the service to get the total vehicle count
+          const agencyId = req.user.agencyId; 
           const totalVehicleCount = await vehicleService.getTotalVehicleService(agencyId);
-      
-          // If an error message come in string
           if (typeof totalVehicleCount === 'string') {
             return res.status(400).json({ message: totalVehicleCount });
           }
-      
-          // If no vehicles are found (vehicleCount is 0)
           if (totalVehicleCount === 0) {
-            return res.status(200).json({
-              message: 'No vehicles found for this agency.',
-              totalVehicle: totalVehicleCount,
-            });
+            return res.status(200).json({ message: 'No vehicles found for this agency.',totalVehicle: totalVehicleCount });
           }
-      
           // If vehicles are found, return the count
-          res.status(200).json({
-            message: 'Total vehicle count retrieved successfully.',
-            totalVehicle: totalVehicleCount,
-          });
+          res.status(200).json({ message: 'Total vehicle count retrieved successfully.',totalVehicle: totalVehicleCount });
         } catch (error) {
-          console.error('Error retrieving vehicle count:', error.message);
-          res.status(500).json({
-            message: 'Failed to retrieve vehicle count',
-            error: error.message,
-          });
+          console.error(error);
+          res.status(500).json({ message: 'Failed to retrieve vehicle count' });
         }
     }
 
     async vehicleBookingPeriod(req, res) {
         try {
             const vehicleId = req.params.vehicleId;
-            console.log('Received vehicleId:', vehicleId);
             if (!vehicleId) {
                 return res.status(400).json({ message: 'Vehicle ID is required.' });
             }
     
             // Call the service to get the booking period
             const bookingPeriod = await vehicleService.vehicleBookingPeriodService(vehicleId);
-    
-            // Check if bookingPeriod is a string (error message from service)
             if (typeof bookingPeriod === 'string') {
                 return res.status(400).json({ message: bookingPeriod });
             }
-    
             // Respond with the booking period if found
-            res.status(200).json({
-                message: 'Vehicle booking period retrieved successfully.',
-                bookingPeriod: bookingPeriod
-            });
+            res.status(200).json({ message: 'Vehicle booking period retrieved successfully.',bookingPeriod: bookingPeriod });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ message: error.message });
+            res.status(500).json({ message: 'An error occurred while retrieving the booking period vehicle.' });
         }
     }
     

@@ -61,20 +61,26 @@ class CUSTOMERSERVICE {
   }
   // Service: Register a new customer
   async registerCustomerService(data) {
-    const { fullName, email, phoneNumber, password, address } = data;
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create a new customer object
-    const customer = new Customer({
-      fullName,
-      email,
-      phoneNumber,
-      password: hashedPassword,
-      address,
-    });
-
-    // Save the customer to the database
-    return await customer.save();
+    try {
+        const { fullName, email, phoneNumber, password, address } = data;
+        const hashedPassword = await bcrypt.hash(password, 10);
+    
+        // Create a new customer object
+        const customer = new Customer({
+          fullName,
+          email,
+          phoneNumber,
+          password: hashedPassword,
+          address,
+        });
+    
+        // Save the customer to the database
+        return await customer.save();
+    } catch (error) {
+        console.error(error);
+        return ;
+    }
+   
   }
 
   // Validate login data

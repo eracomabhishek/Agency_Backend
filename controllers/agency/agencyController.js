@@ -114,7 +114,7 @@ class AGENCY {
         console.log(`Fetching counts for agencyId: ${agencyId}`); // Debug log
 
         const result = await agencyService.getBookingCountService(agencyId);
-        if (result) {
+        if (!result) {
             return res.status(400).json({ message: result });
         }
         // Return the result to the frontend

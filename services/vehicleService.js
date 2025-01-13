@@ -2,60 +2,69 @@ const Vehicle = require('../models/Vehicle');
 const Agency = require('../models/Agency');
 const Booking = require('../models/Booking');
 
-class VEHICLESERVICE{
+class VEHICLESERVICE {
     async createVehicleService(data, files, agencyId) {
-        const { vehicleName, vehicleType, capacity, pricePerDay, pricePerHour, availability, features, description, exceedCharges } = data;
-      
-        // Check if the agency exists
-        const agency = await Agency.findOne({ agencyId });
-        if (!agency) {
-          return 'Agency not found.';
+        try {
+            const { vehicleName, vehicleType, capacity, pricePerDay, pricePerHour, availability, features, description, exceedCharges } = data;
+
+            // Check if the agency exists
+            const agency = await Agency.findOne({ agencyId });
+            if (!agency) {
+                return 'Agency not found.';
+            }
+
+            // Extract the file paths from files
+            const images = files.map((file) => file.path);
+
+            // Create a new vehicle and include the agencyId and agencyName
+            const vehicle = new Vehicle({
+                agencyId,
+                agencyName: agency.agencyName,
+                vehicleName,
+                vehicleType,
+                capacity,
+                description,
+                exceedCharges,
+                pricePerDay,
+                pricePerHour,
+                availability: availability ?? true,
+                features: features || [],
+                images: images || [],
+            });
+
+            // Save the vehicle to the database
+            const savedVehicle = await vehicle.save();
+
+            // Increment the totalVehicle count in the Agency schema
+            agency.totalVehicle = agency.totalVehicle + 1;
+            await agency.save();
+
+            return savedVehicle;
+        } catch (error) {
+            console.error(error);
+            return 'Error creating vehicle service.';
         }
-      
-        // Extract the file paths from files
-        const images = files.map((file) => file.path);
-      
-        // Create a new vehicle and include the agencyId and agencyName
-        const vehicle = new Vehicle({
-          agencyId,
-          agencyName: agency.agencyName,
-          vehicleName,
-          vehicleType,
-          capacity,
-          description,
-          exceedCharges,
-          pricePerDay,
-          pricePerHour,
-          availability: availability ?? true,
-          features: features || [],
-          images: images || [],
-        });
-      
-        // Save the vehicle to the database
-        const savedVehicle = await vehicle.save();
-      
-        // Increment the totalVehicle count in the Agency schema
-        agency.totalVehicle = agency.totalVehicle + 1; 
-        await agency.save();
-      
-        return savedVehicle;
-      }
-      
+
+    }
+
 
     async findVehicleByIdService(vehicleId) {
-        if (!vehicleId) {
-            return null; // Return null for invalid vehicleId
-        }
         try {
-            const vehicle = await Vehicle.findOne({ vehicleId }); 
-            return vehicle || null; 
+            if (!vehicleId) {
+                return null; // Return null for invalid vehicleId
+            }
+            const vehicle = await Vehicle.findOne({ vehicleId });
+            if (!vehicle) {
+                return 'Vehicle not found in service.';
+            }
+            return vehicle;
         } catch (error) {
             console.error('Error in findVehicleById service:', error.message);
-            return null; 
+            return null;
         }
     }
-    
-    
+
+
     async getAllVehiclesService() {
         try {
             // Fetch all vehicles
@@ -73,7 +82,7 @@ class VEHICLESERVICE{
 
             return vehiclesWithAgencyDetails;
         } catch (error) {
-            console.error('Error in getAllVehicles service:', error);
+            console.error(error);
             return 'Error retrieving vehicles from the database';
         }
     }
@@ -83,305 +92,122 @@ class VEHICLESERVICE{
             const vehicles = await Booking.find({ agencyId }).populate('vehicleId');
             return vehicles;
         } catch (error) {
-            console.error('Error in getRentedVehicles service:', error);
-            throw new Error('Error retrieving rented vehicles from the database');
+            console.error('Error in get Rented Vehicles service:', error);
+            return 'Error retrieving rented vehicles from the database';
         }
     }
 
     async getVehiclesByAgencyService(agencyId) {
-        const vehicles = await Vehicle.find({ agencyId });
-        if (vehicles.length === 0) {
-            throw new Error('No vehicles found for this agency.');
+        try{
+            const vehicles = await Vehicle.find({ agencyId });
+            if (vehicles.length === 0) {
+                return 'No vehicles found for this agency.';
+            }
+            return vehicles;
         }
-        return vehicles;
+        catch(error){
+            console.error('Error in get Vehicles By Agency service:', error);
+            return 'Error retrieving vehicles from the database';
+        }
     }
 
-    // async getVehicleByRegistrationNumberService(registrationNumber) {
-    //     const vehicle = await Vehicle.findOne({ registrationNumber }).populate('agencyId', 'agencyName');
-    //     if (!vehicle) {
-    //         throw new Error('Vehicle not found.');
-    //     }
-    //     return vehicle;
-    // }
 
     async updateVehicleService(vehicleId, updates, files) {
-        console.log("Received vehicleId:", vehicleId); // Log the vehicle ID to check the value
-        console.log("Updates received:", updates); // Log the updates to debug
-
-        // Find the vehicle by vehicleId
-        const vehicle = await Vehicle.findOne({ vehicleId }); // Direct match for numeric vehicleId
-        if (!vehicle) {
-            throw new Error('Vehicle not found.');
+        try {
+            // Prepare the update object
+            const updateData = {};
+    
+            if (updates.vehicleName) updateData.vehicleName = updates.vehicleName;
+            if (updates.vehicleType) updateData.vehicleType = updates.vehicleType;
+            if (updates.capacity) updateData.capacity = updates.capacity;
+            if (updates.description) updateData.description = updates.description;
+            if (updates.pricePerDay) updateData.pricePerDay = updates.pricePerDay;
+            if (updates.availability) updateData.availability = updates.availability;
+            if (updates.features) {
+                updateData.features = Array.isArray(updates.features) ? updates.features : [updates.features];
+            }
+    
+            // Handle images if files are provided
+            if (files && files.length > 0) {
+                updateData.images = files.map((file) => file.path);
+            }
+    
+            // Find and update the vehicle
+            const updatedVehicle = await Vehicle.findOneAndUpdate(
+                { vehicleId }, // Direct match for numeric vehicleId
+                { $set: updateData },
+                { new: true } // Return the updated document
+            );
+    
+            if (!updatedVehicle) {
+                return 'Vehicle not found.';
+            }
+            return updatedVehicle;
+        } catch (error) {
+            console.error('Error updating vehicle:', error);
+            return 'Failed to update vehicle service.';
         }
-
-        console.log("Found vehicle:", vehicle); // Log the result of the query
-
-        // Update the fields if provided
-        if (updates.vehicleName) vehicle.vehicleName = updates.vehicleName;
-        if (updates.vehicleType) vehicle.vehicleType = updates.vehicleType;
-        if (updates.capacity) vehicle.capacity = updates.capacity;
-        if (updates.description) vehicle.description = updates.description;
-        if (updates.pricePerDay) vehicle.pricePerDay = updates.pricePerDay;
-        if (updates.availability) vehicle.availability = updates.availability;
-        if (updates.features) {
-            vehicle.features = Array.isArray(updates.features) ? updates.features : [updates.features];
-        }
-
-        // Handle images if files are provided
-        if (files && files.length > 0) {
-            const images = files.map((file) => file.path);
-            vehicle.images = images;
-        }
-
-        console.log("Modified vehicle before save:", vehicle); // Log the updated vehicle
-
-        // Save the updated vehicle
-        return await vehicle.save();
     }
+    
 
     async deleteVehicleService(vehicleId) {
-        const deletedVehicle = await Vehicle.findOneAndDelete({ vehicleId });
-        if (!deletedVehicle) {
-            throw new Error('Vehicle not found.');
-        }
-
-        const agency = await Agency.findOne({ agencyId: deletedVehicle.agencyId }); 
+        try {
+            const deletedVehicle = await Vehicle.findOneAndDelete({ vehicleId });
+            if (!deletedVehicle) {
+                return 'Vehicle not found.';
+            }
+            await Agency.findByIdAndUpdate(
+                deletedVehicle.agencyId, 
+                { $inc: { totalVehicle: -1 } }, 
+                { new: true } 
+            );
         
-        if (agency) {
-            agency.totalVehicle -= 1; // Decrease the vehicle count
-            await agency.save(); // Save the updated agency document
+            return deletedVehicle;
+        } catch (error) {
+            console.error('Error deleting vehicle:', error);
+            return 'Failed to delete vehicle service.';
         }
-
-        return deletedVehicle;
+        
     }
 
     async getTotalVehicleService(agencyId) {
         try {
-          // Count the number of vehicles associated with the agencyId in the Vehicle collection
-          const vehicleCount = await Vehicle.countDocuments({ agencyId });
-          // Return only the totalVehicle count
-          return vehicleCount;
-        } catch (error) {
-          return `Error updating vehicle count: ${error.message}`; // Return error message if any
-        }
-      }
-      
-      async vehicleBookingPeriodService(vehicleId) {
-        try {
-            const findVehicle = await Booking.findOne({ vehicleId: vehicleId });
-            if (!findVehicle) {
-                return 'Vehicle not found in bookng period';
-            }
-    
-            // Destructure startDate and endDate from the found booking
-            const { startDate, endDate } = findVehicle;
-    
-            // Return the booking period (startDate and endDate)
-            return { startDate, endDate };
-    
+            const vehicleCount = await Vehicle.countDocuments({ agencyId });
+            if(!vehicleCount)
+            return 'No vehicles found for the given agency. ';
         } catch (error) {
             console.error(error);
-            return 'Error fetching booking period';
+            return 'Error updating vehicle count service' // Return error message if any
+        }
+    }
+
+    async vehicleBookingPeriodService(vehicleId) {
+        try {
+            // Find all bookings for the given vehicleId
+            const bookings = await Booking.find({ vehicleId });
+    
+            // Check if no bookings are found
+            if (!bookings || bookings.length === 0) {
+                return 'No bookings found for the given vehicle.';
+            }
+    
+            // Extract startDate and endDate for each booking
+            const bookingPeriods = bookings.map((booking) => ({
+                startDate: booking.startDate,
+                endDate: booking.endDate,
+            }));
+    
+            return bookingPeriods; // Return the array of booking periods
+        } catch (error) {
+            console.error('Error fetching booking periods:', error);
+            return 'Error fetching booking periods';
         }
     }
     
-      
+
+
 }
 
 const vehicleService = new VEHICLESERVICE();
 module.exports = vehicleService;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const Vehicle = require('../models/Vehicle');
-// const Agency = require('../models/Agency');
-// const Booking = require('../models/Booking');
-
-
-// exports.createVehicleService = async (data, files, agencyId) => {
-//     const { vehicleName, vehicleType, capacity, pricePerDay, pricePerHour, availability, features, description } = data;
-
-//     // Validate required fields
-//     const requiredFields = ['vehicleName', 'vehicleType', 'pricePerDay', 'pricePerHour', 'capacity', 'description', 'features', 'availability'];
-//     for (let field of requiredFields) {
-//         if (!data[field]) {
-//             throw new Error(`The field ${field} is required.`);
-//         }
-//     }
-
-//     // Check if images were uploaded
-//     if (!files || files.length === 0) {
-//         throw new Error('At least one image is required.');
-//     }
-
-//     // Extract the file paths from files
-//     const images = files.map((file) => file.path);
-
-//     // Check if the agency exists
-//     const agency = await Agency.findOne({ agencyId:agencyId });
-//     if (!agency) {
-//         throw new Error('Agency not found.');
-//     }
-
-// //     const agency = await Agency.findOne({ agencyId: agencyId });  // Use findOne instead of find
-// // if (!agency) {
-// //     throw new Error('Agency not found.');
-// // }
-
-//     // Create a new vehicle and include the agencyId and agencyName
-//     const vehicle = new Vehicle({
-//         agencyId, 
-//         agencyName: agency.agencyName, 
-//         vehicleName,
-//         vehicleType,
-//         capacity,
-//         description,
-//         pricePerDay,
-//         pricePerHour,
-//         availability: availability ?? true, 
-//         features: features || [], 
-//         images: images || [], 
-//     });
-
-//     // Save the vehicle to the database
-//     return await vehicle.save();
-// };
-
-
-
-// // get vehicle by ID
-// exports.findVehicleByIdService = async (vehicleId) => {
-//     if (!vehicleId) {
-//         throw new Error('Vehicle ID is required.');
-//     }
-//     try {
-//         const vehicle = await Vehicle.findOne({ vehicleId: vehicleId });
-
-//         if (!vehicle) {
-//             throw new Error('Vehicle not found.');
-//         }
-//         return vehicle; // Return the vehicle document
-//     } catch (error) {
-//         console.error('Error in findVehicleById service:', error.message);
-//         throw error;
-//     }
-// };
-
-
-
-// // Get all vehicles
-// exports.getAllVehiclesService = async () => {
-//     try {
-//         // Fetch all vehicles
-//         const vehicles = await Vehicle.find();
-//         // For each vehicle, fetch the agency details based on agencyId
-//         const vehiclesWithAgencyDetails = await Promise.all(
-//             vehicles.map(async (vehicle) => {
-//                 const agency = await Agency.findOne({ agencyId: vehicle.agencyId });
-//                 return {
-//                     ...vehicle.toObject(),
-//                     agencyName: agency ? agency.agencyName : 'Unknown Agency', // Adding agencyName manually
-//                 };
-//             })
-//         );
-
-//         return vehiclesWithAgencyDetails;
-//     } catch (error) {
-//         console.error('Error in getAllVehiclesService:', error);
-//         throw new Error('Error retrieving vehicles from the database');
-//     }
-// };
-
-// exports.getRentedVehicleService = async (agencyId) => {
-//     try {
-//         const vehicles = await Booking.find({ agencyId: agencyId }).populate('vehicleId'); 
-//         if(!vehicles){
-//             throw new Error('Not rented Vehicle')
-//         }
-//         return vehicles;
-//     } catch (error) {
-//         console.error('Error in getAllVehicles service:', error);
-//         throw new Error('Error retrieving Rented vehicles from the database');
-//     }
-// };
-
-// // Get vehicles by agency ID
-// exports.getVehiclesByAgencyService = async (agencyId) => {
-//     const vehicles = await Vehicle.find({ agencyId:agencyId });
-//     if (vehicles.length === 0) {
-//         throw new Error('No vehicles found for this agency.');
-//     }
-//     return vehicles;
-// };
-
-// // Get vehicle by registration number
-// // exports.getVehicleByRegistrationNumberService = async (registrationNumber) => {
-// //     const vehicle = await Vehicle.findOne({ registrationNumber }).populate('agencyId', 'agencyName');
-// //     if (!vehicle) {
-// //         throw new Error('Vehicle not found.');
-// //     }
-// //     return vehicle;
-// // };
-
-// // Update vehicle details
-// exports.updateVehicleService = async (vehicleId, updates, files) => {
-//     console.log("Received vehicleId:", vehicleId); // Log the vehicle ID to check the value
-//     console.log("Updates received:", updates); // Log the updates to debug
-
-//     // Find the vehicle by vehicleId
-//     const vehicle = await Vehicle.findOne({ vehicleId }); // Direct match for numeric vehicleId
-//     if (!vehicle) {
-//         throw new Error('Vehicle not found.');
-//     }
-
-//     console.log("Found vehicle:", vehicle); // Log the result of the query
-
-//     // Update the fields if provided
-//     if (updates.vehicleName) vehicle.vehicleName = updates.vehicleName;
-//     if (updates.vehicleType) vehicle.vehicleType = updates.vehicleType;
-//     if (updates.capacity) vehicle.capacity = updates.capacity;
-//     if (updates.description) vehicle.description = updates.description;
-//     if (updates.pricePerDay) vehicle.pricePerDay = updates.pricePerDay;
-//     if (updates.availability ) vehicle.availability = updates.availability;
-//     if (updates.features) {
-//         vehicle.features = Array.isArray(updates.features) ? updates.features : [updates.features];
-//     }
-
-//     // Handle images if files are provided
-//     if (files && files.length > 0) {
-//         const images = files.map((file) => file.path);
-//         vehicle.images = images;
-//     }
-
-//     console.log("Modified vehicle before save:", vehicle); // Log the updated vehicle
-
-//     // Save the updated vehicle
-//     return await vehicle.save();
-// };
-
-
-
-// // Delete a vehicle
-// exports.deleteVehicleService = async (vehicleId) => {
-//     const deletedVehicle = await Vehicle.findOneAndDelete({ vehicleId });
-//     if (!deletedVehicle) {
-//         throw new Error('Vehicle not found.');
-//     }
-//     return deletedVehicle;
-// };
-
 
