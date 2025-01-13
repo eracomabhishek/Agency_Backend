@@ -14,7 +14,7 @@ router.get('/vehicle/options', paginationService.fetchOptions);
 router.post('/agencies', agencyController.createAgency);                        // create agency
 router.post('/loginAgency', agencyController.loginAgency);                      // login  agency
 router.post('/update/agency',verifyToken, agencyController.updateAgencyProfile); // update agency
-router.get('/agency-details',verifyToken, agencyController.getAgencyDetails);                             // get agency
+router.get('/agency-details/:agencyId', agencyController.getAgencyDetails);                             // get agency
 router.get('/booking-count', verifyToken, agencyController.getBookingCount);
 router.post('/agency-forgot-password', agencyController.forgotPassword);
 router.post('/agency-reset-password', agencyController.resetPassword);

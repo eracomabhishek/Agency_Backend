@@ -156,11 +156,14 @@ class VEHICLESERVICE {
             if (!deletedVehicle) {
                 return 'Vehicle not found.';
             }
-            await Agency.findByIdAndUpdate(
+            const updatedAgency = await Agency.findByIdAndUpdate(
                 deletedVehicle.agencyId, 
                 { $inc: { totalVehicle: -1 } }, 
                 { new: true } 
             );
+            if (!updatedAgency) {
+                return 'Failed to update agency vehicle count.';
+            }
         
             return deletedVehicle;
         } catch (error) {

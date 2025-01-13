@@ -151,6 +151,9 @@ class VEHICLE {
     async deleteVehicle(req, res) {
         try {
             const deletedVehicle = await vehicleService.deleteVehicleService(req.params.vehicleId);
+            if (typeof deletedVehicle === 'string') {
+                return res.status(404).json({ message: deletedVehicle });
+                };
             res.status(200).json({ message: 'Vehicle deleted successfully', data: deletedVehicle });
         } catch (error) {
             console.error(error);

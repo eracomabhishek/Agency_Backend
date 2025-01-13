@@ -93,7 +93,7 @@ class AGENCY {
 
     async getAgencyDetails(req, res) {
         try {
-          const agencyId = req.user.agencyId;
+          const agencyId = req.params.agencyId;
           // Find the agency by ID, excluding the password field
           const findAgency = await Agency.find({ agencyId: agencyId }).select('-password');
       

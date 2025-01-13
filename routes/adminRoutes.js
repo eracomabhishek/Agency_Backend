@@ -6,6 +6,6 @@ const agencyController = require('../controllers/agency/agencyController');
 
 router.post('/adminlogin', adminController.adminLogin);
 router.get('/pendingagency', adminController.getPendingAgency);
-router.get('/getagency', agencyController.getAgencyDetails);
+router.get('/getagencydetails/:agencyId', agencyController.getAgencyDetails);
 
 module.exports = router;
