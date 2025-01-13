@@ -55,25 +55,42 @@ class ADMIN {
 
     async getPendingAgency(req,res){
         try {
-            const agencies = await Agency.find({ status: 'Pending' });
-            const totalPendingCount = await Agency.countDocuments({ status: 'Pending' });
-            // Check if no agencies are found
-            if (agencies.length === 0) {
-                return res.status(404).json({
-                    message: 'No pending agencies found.',
-                    totalPendingCount: 0,
+            const status = req.query.status;
+            if (!status) {
+                return res.status(400).json({
+                    message: 'Status query parameter is required.',
                 });
             }
-            // Return the list of agencies and total count
+            
+            const validStatuses = ['Pending', 'Approved', 'Rejected'];
+            if (!validStatuses.includes(status)) {
+                return res.status(400).json({
+                    message: 'Invalid status. Please provide either "Pending" or "Approved".',
+                });
+            }
+            
+        
+            const agencies = await Agency.find({ status: status });
+            const totalCount = await Agency.countDocuments({ status: status });
+        
+            // Check if no agencies are found for the provided status
+            if (agencies.length === 0) {
+                return res.status(404).json({
+                    message: `No ${status} agencies found.`,
+                    totalCount: 0,
+                });
+            }
+            // Return the filtered list of agencies and total count
             res.status(200).json({
-                message: 'Pending agencies fetched successfully',
-                totalPendingCount: totalPendingCount, 
+                message: `${status} agencies fetched successfully`,
+                totalCount: totalCount,
                 data: agencies,
             });
         } catch (error) {
-            console.error('Error fetching pending agencies:', error);
-            res.status(500).json({ message: 'Error fetching pending agencies' });
+            console.error('Error fetching agencies:', error);
+            res.status(500).json({ message: 'Error fetching agencies' });
         }
+        
         
     }
 

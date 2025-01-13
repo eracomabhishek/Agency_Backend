@@ -54,7 +54,7 @@ class AGENCY {
             // Generate JWT token
             const token = jwt.sign(
                 payload, 
-                process.env.JWT_SECRET,
+                process.env.JWT_KEY,
             );
 
             // Respond with the token

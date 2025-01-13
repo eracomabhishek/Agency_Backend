@@ -18,8 +18,7 @@ router.get('/agency-details',verifyToken, agencyController.getAgencyDetails);   
 router.get('/booking-count', verifyToken, agencyController.getBookingCount);
 router.post('/agency-forgot-password', agencyController.forgotPassword);
 router.post('/agency-reset-password', agencyController.resetPassword);
-// router.get('/booking-confirmed', verifyToken, agencyController.getBookingConfirmed);
-// router.get('/booking-cancelled', verifyToken, agencyController.getBookingCancelled);
+
 
 // Vehicle routes
 router.get('/total-vehicle', verifyToken, vehicleController.getTotalVehicles);
@@ -38,13 +37,6 @@ router.post('/billing', billingService.billing);
 
 
 
-// Protected route
-router.get("/home", verifyToken, (req, res) => {
-    res.status(200).json({
-      msg: "Welcome to the protected home route!",
-      user: req.user 
-    });
-});
 
 
 module.exports = router;

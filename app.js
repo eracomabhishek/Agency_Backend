@@ -21,7 +21,11 @@ const userRoutes = require("./routes/userRoutes");
 app.use("/api", userRoutes);
 
 const agencyRoutes = require("./routes/agencyRoutes");
+console.log("Before app.use() call"); // Log before any routes are used.
 app.use("/api", agencyRoutes);
+console.log("After app.use() call"); // Log after to confirm that the use is triggered.
+
+
 
 const adminRoutes = require("./routes/adminRoutes");
 app.use("/api", adminRoutes);

@@ -28,7 +28,10 @@ class CUSTOMER {
             const { email, password } = req.body;
 
             // Validate the input data
-            customerService.validateLoginData({ email, password });
+            const validateCustomer = customerService.validateLoginData({ email, password });
+            if (validateCustomer) {
+                return res.status(400).json({ message: validateCustomer });
+                }
 
             const customer = await customerService.authenticateCustomer(email, password);
 
@@ -39,7 +42,7 @@ class CUSTOMER {
             // Generate JWT token
             const token = jwt.sign(
                 payload, 
-                process.env.JWT_SECRET,
+                process.env.JWT_KEY,
             );
 
             console.log("payload", payload)
