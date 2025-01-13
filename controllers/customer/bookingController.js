@@ -71,8 +71,8 @@ class BOOKING {
 
             // Create booking using the service
             const newBooking = await bookingService.createBookingService(req.body);
-            if (newBooking) {
-                return res.status(201).json({ message: newBooking });
+            if (typeof newBooking === 'string') {
+                return res.status(400).json({ message: newBooking });
             }
 
             return res.status(201).json({
@@ -80,7 +80,8 @@ class BOOKING {
                 data: newBooking,
             });
         } catch (error) {
-            return res.status(500).json({ message: error.message });
+            console.error(error);
+            return res.status(500).json({ message: 'An error while creating booking' });
         }
 
     }
@@ -97,7 +98,7 @@ class BOOKING {
                 });
             }
             const updatedBooking = await bookingService.updateBookingStatusService(bookingId, req.body);
-            if (updatedBooking) {
+            if ( typeof updatedBooking === 'string') {
                 return res.status(200).json({ message: updatedBooking });
             }
 
@@ -116,23 +117,22 @@ class BOOKING {
     async getBookingDetailsById(req, res) {
         try {
             const { bookingId } = req.params;
-
+    
             const booking = await bookingService.getBookingDetailsByIdService(bookingId);
-            if (booking) {
-                return res.status(400).json({ message: booking });
+            if (!booking) {
+                return res.status(404).json({ message: 'Booking not found.' });
             }
-
+    
             res.status(200).json({
                 message: 'Booking details fetched successfully',
                 data: booking,
             });
         } catch (error) {
-            res.status(500).json({
-                message: 'Error fetching booking details',
-                error: error.message,
-            });
+            console.error('Error fetching booking details:', error);
+            res.status(500).json({ message: 'Error fetching booking details' });
         }
     }
+    
 
     // Fetch all bookings
     async getAllBookings(req, res) {

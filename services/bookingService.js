@@ -52,34 +52,50 @@ class BOOKINGSERVICE {
 
   // Update booking status
   async updateBookingStatusService(bookingId, { bookingStatus, paymentStatus }) {
-    const booking = await Booking.findOne({ bookingId: bookingId });
+    try {
+        // Prepare the update object
+        const updateData = {};
+        if (bookingStatus !== undefined) {
+            updateData.bookingStatus = bookingStatus;
+        }
+        if (paymentStatus !== undefined) {
+            updateData.paymentStatus = paymentStatus;
+        }
+        // Update the booking using findByIdAndUpdate
+        const updatedBooking = await Booking.findByIdAndUpdate(
+            bookingId, 
+            { $set: updateData },
+            { new: true } 
+        );
 
-    if (!booking) {
-      return 'Booking not found.';
+        // Check if the booking was found and updated
+        if (!updatedBooking) {
+            return 'Booking not found.';
+        }
+        return updatedBooking;
+    } catch (error) {
+        console.error(error);
+        return 'Failed to update booking status.';
     }
-    if (bookingStatus !== undefined) {
-      booking.bookingStatus = bookingStatus;
-    }
-    if (paymentStatus !== undefined) {
-      booking.paymentStatus = paymentStatus;
-    }
-    return await booking.save();
-  }
+}
+
 
   // Fetch booking details by ID
   async getBookingDetailsByIdService(bookingId) {
-    const booking = await Booking.findById(bookingId).populate([
-      { path: 'customerId' },
-      { path: 'vehicleId' },
-      { path: 'agencyId' }
-    ]);
+    try {
+        const booking = await Booking.findById(bookingId).populate([
+            { path: 'customerId' },
+            { path: 'vehicleId' },
+            { path: 'agencyId' }
+        ]);
 
-    if (!booking) {
-      return 'Booking not found.';
+        return booking; // Return null if no booking is found
+    } catch (error) {
+        console.error('Error in getBookingDetailsByIdService:', error);
+        throw new Error('Failed to fetch booking details'); // Let the controller handle the error
     }
+}
 
-    return booking;
-  }
 
   // Get all bookings
   async getAllBookingsService() {

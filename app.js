@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
-require('./config/connection')
+require('./config/connection');
+require('./models/Admin');
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path")
@@ -22,7 +23,8 @@ app.use("/api", userRoutes);
 const agencyRoutes = require("./routes/agencyRoutes");
 app.use("/api", agencyRoutes);
 
-
+const adminRoutes = require("./routes/adminRoutes");
+app.use("/api", adminRoutes);
 
 const PORT = process.env.PORT || 8000;
 
