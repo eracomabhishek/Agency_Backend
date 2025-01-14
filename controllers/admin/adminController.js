@@ -186,8 +186,7 @@ class ADMIN {
         }
     }
 
-
-  async  getCounts(req, res) {
+   async  getCounts(req, res) {
     try {
         
         const agencyCount = await Agency.countDocuments(); 
@@ -206,7 +205,9 @@ class ADMIN {
         console.error(error);
         return res.status(500).json({ message: 'An error occurred while fetching counts.' });
     }
-}
+    }
+
+    
 
 }
 
