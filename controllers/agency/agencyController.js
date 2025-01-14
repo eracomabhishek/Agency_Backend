@@ -34,18 +34,22 @@ class AGENCY {
         try {
             const { contactEmail, password } = req.body;
 
-            // Use the service to validate login data
-            const validationError = await agencyService.validateLoginDataService({ contactEmail, password });
-            if (validationError) {
-                return res.status(400).json({ message: validationError });
+            if (!contactEmail || !password) {
+                return res.status(400).json({ message: "Email and password are required."});
             }
-            const agency = await agencyService.authenticateAgencyService({ contactEmail, password });
+            
+             const agency = await Agency.findOne({ contactEmail });
+                        if (!agency) {
+                            return res.status(400).json({ message: 'agency not Registered'});
+                        }
+                        // Check if the password matches
+                        const isPasswordValid = await bcrypt.compare(password, agency.password);
+            
+                        if (!isPasswordValid) {
+                            return res.status(400).json({ message: 'Invalid password.'});
+                        }
 
-            // Check if authentication failed
-            if (typeof agency === 'string') {
-                return res.status(400).json({ message: agency }); // If it's an error message (e.g., 'Invalid email.'), return the error
-            }
-
+            
             const payload = {
                 agencyId: agency.agencyId,
                 role: "agency",
@@ -58,9 +62,10 @@ class AGENCY {
             );
 
             // Respond with the token
-            res.status(200).json({
+           return res.status(200).json({
                 message: 'Login successful',
                 token,
+                agency,
             });
         } catch (error) {
             console.error('Login error:', error.message);

@@ -2,6 +2,9 @@ const Admin = require('../../models/Admin');
 const Agency = require('../../models/Agency')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const agencyService = require('../../services/agencyService');
+const agencyController = require('../agency/agencyController');
+const vehicleService = require('../../services/vehicleService');
 
 class ADMIN {
 
@@ -53,7 +56,7 @@ class ADMIN {
 
     }
 
-    async getPendingAgency(req,res){
+    async getStatusByAgency(req,res){
         try {
             const status = req.query.status;
             if (!status) {
@@ -93,6 +96,67 @@ class ADMIN {
         
         
     }
+
+    async getVehicleWithAgencyId(req,res){
+        try {
+            const agencyId = req.params.agencyId;
+            if (!agencyId) {
+                return res.status(400).json({ message: 'agencyId required ' });
+            }
+           const agencydata= await vehicleService.getVehiclesByAgencyService(agencyId)
+            if (typeof agencydata === 'string') {
+                return res.status(200).json({ message: agencydata });
+            }
+            
+         return res.status(200).json({ message: 'agency data fetched successfully',
+            data: agencydata,
+         })
+          
+        } catch (error) {
+            console.error('Error fetching agencies:', error);
+            res.status(500).json({ message: 'Error fetching agencies' });
+        }
+        
+        
+    }
+
+    async updateAgencyStatus(req, res) {
+        try {
+            const { agencyId, status } = req.body;
+            if (!agencyId || !status) {
+                return res.status(400).json({ message: 'Agency ID and status are required.' });
+            }
+    
+            const validStatuses = ['Approved', 'Rejected'];
+            if (!validStatuses.includes(status)) {
+                return res.status(400).json({
+                    message: 'Invalid status. Please provide either "Rejected" or "Approved".',
+                });
+            }
+    
+            // Find and update the agency's status
+            const updatedAgency = await Agency.findOneAndUpdate(
+                { agencyId },
+                { status },
+                { new: true } // Returns the updated document
+            );
+    
+            if (!updatedAgency) {
+                return res.status(404).json({ message: 'Agency not found.' });
+            }
+    
+            // Respond with the updated agency
+            return res.status(200).json({
+                message: `Agency status successfully updated to ${status}.`,
+                agency: updatedAgency,
+            });
+    
+        } catch (error) {
+            console.error('Error in updateAgencyStatus:', error);
+            return res.status(500).json({ message: 'Internal server error.' });
+        }
+    }
+    
 
 
 }

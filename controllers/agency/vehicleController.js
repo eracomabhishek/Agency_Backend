@@ -1,41 +1,68 @@
-const vehicleService = require('../../services/vehicleService');
-const Vehicle = require('../../models/Vehicle');
-const jwt = require('jsonwebtoken'); 
+const vehicleService = require("../../services/vehicleService");
+const Vehicle = require("../../models/Vehicle");
+const jwt = require("jsonwebtoken");
 
 class VEHICLE {
     // Method to create a new vehicle
     async createVehicle(req, res) {
         try {
-            const agencyId = req.user.agencyId; 
-             const { vehicleName, vehicleType, capacity, pricePerDay, pricePerHour, availability, features, description, exceedCharges } = req.body;
-            
-                    // Validate required fields
-                    const requiredFields = ['vehicleName', 'vehicleType', 'pricePerDay', 'pricePerHour', 'capacity', 'description', 'features', 'availability', 'exceedCharges'];
-                    for (let field of requiredFields) {
-                        if (!req.body[field]) {
-                            return res.status(400).json({ message: `Please enter ${field}` });
-                        }
-                    }
-            
-                    // Check if images were uploaded
-                    const files = req.files;
-                    if (!files || files.length === 0) {
-                         return res.status(400).json({ message: 'At least one image is required.'});
-                    }
-            
-                  
-            const savedVehicle = await vehicleService.createVehicleService(req.body, req.files, agencyId);
-            if (typeof savedVehicle === 'string') {
-                return res.status(400).json({ message: savedVehicle }); 
+            const agencyId = req.user.agencyId;
+            const {
+                vehicleName,
+                vehicleType,
+                capacity,
+                pricePerDay,
+                pricePerHour,
+                availability,
+                features,
+                description,
+                exceedCharges,
+            } = req.body;
+
+            // Validate required fields
+            const requiredFields = [
+                "vehicleName",
+                "vehicleType",
+                "pricePerDay",
+                "pricePerHour",
+                "capacity",
+                "description",
+                "features",
+                "availability",
+                "exceedCharges",
+            ];
+            for (let field of requiredFields) {
+                if (!req.body[field]) {
+                    return res.status(400).json({ message: `Please enter ${field}` });
+                }
+            }
+
+            // Check if images were uploaded
+            const files = req.files;
+            if (!files || files.length === 0) {
+                return res
+                    .status(400)
+                    .json({ message: "At least one image is required." });
+            }
+
+            const savedVehicle = await vehicleService.createVehicleService(
+                req.body,
+                req.files,
+                agencyId
+            );
+            if (typeof savedVehicle === "string") {
+                return res.status(400).json({ message: savedVehicle });
             }
 
             res.status(201).json({
-                message: 'Vehicle created successfully',
-                data: savedVehicle
+                message: "Vehicle created successfully",
+                data: savedVehicle,
             });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ message: 'An error occurred while adding vehicle.' });
+            res
+                .status(500)
+                .json({ message: "An error occurred while adding vehicle." });
         }
     }
 
@@ -44,76 +71,86 @@ class VEHICLE {
         try {
             const vehicles = await vehicleService.getAllVehiclesService();
             if (!vehicles || vehicles.length === 0) {
-                return res.status(404).json({ message: 'No vehicles found' });
+                return res.status(404).json({ message: "No vehicles found" });
             }
-            res.status(200).json({ 
-                message: 'Vehicles retrieved successfully', 
-                data: vehicles 
+            res.status(200).json({
+                message: "Vehicles retrieved successfully",
+                data: vehicles,
             });
         } catch (error) {
-            console.error('Error fetching vehicles:', error);
-            res.status(500).json({ 
-                message: error.message 
+            console.error("Error fetching vehicles:", error);
+            res.status(500).json({
+                message: error.message,
             });
         }
     }
 
     // Method to get rented vehicles by agencyId
     async getRentedVehicles(req, res) {
-        try {  
+        try {
             const agencyId = req.params.agencyId;
             const vehicles = await vehicleService.getRentedVehiclesService(agencyId);
             if (!vehicles || vehicles.length === 0) {
-                return res.status(404).json({ message: 'No Rented Vehicle' });
+                return res.status(404).json({ message: "No Rented Vehicle" });
             }
-            res.status(200).json({ 
-                message: 'Vehicles retrieved successfully', 
-                data: vehicles 
+            res.status(200).json({
+                message: "Vehicles retrieved successfully",
+                data: vehicles,
             });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ message: 'Error while fetching rented vehicles' });
+            res.status(500).json({ message: "Error while fetching rented vehicles" });
         }
     }
 
     // Method to get vehicle by ID
     async getVehicleById(req, res) {
         const { vehicleId } = req.params;
-    
+
         if (!vehicleId) {
-            return res.status(400).json({ message: 'Vehicle ID is required.' });
+            return res.status(400).json({ message: "Vehicle ID is required." });
         }
-    
+
         try {
             // Call the service to find the vehicle by ID
             const vehicle = await vehicleService.findVehicleByIdService(vehicleId);
-    
+
             if (!vehicle) {
-                return res.status(404).json({ message: 'Vehicle not found.' });
+                return res.status(404).json({ message: "Vehicle not found." });
             }
-    
+
             res.status(200).json({
-                message: 'Vehicle retrieved successfully.',
-                data: vehicle
+                message: "Vehicle retrieved successfully.",
+                data: vehicle,
             });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ message: 'An error occurred while retrieving the vehicle.' });
+            res
+                .status(500)
+                .json({ message: "An error occurred while retrieving the vehicle." });
         }
     }
-    
 
     // Method to get vehicles by agency ID
     async getVehiclesByAgency(req, res) {
         try {
-            const agencyId = req.user.agencyId;
-            const vehicles = await vehicleService.getVehiclesByAgencyService(agencyId);
-            if (typeof vehicles === 'string') {
+            const agencyId = req.params.agencyId;
+            const vehicles = await vehicleService.getVehiclesByAgencyService(
+                agencyId
+            );
+            if (typeof vehicles === "string") {
                 return res.status(404).json({ message: vehicles });
-                };
-            res.status(200).json({ message: 'Vehicles retrieved successfully', data: vehicles });
+            }
+            res
+                .status(200)
+                .json({ message: "Vehicles retrieved successfully", data: vehicles });
         } catch (error) {
-            res.status(500).json({ message: 'An error occurred while retrieving the vehicle by agency' });
+            console.error(error);
+            res
+                .status(500)
+                .json({
+                    message: "An error occurred while retrieving the vehicle by agency",
+                });
         }
     }
 
@@ -133,28 +170,46 @@ class VEHICLE {
             const vehicleId = req.params.vehicleId;
             const vehicle = await Vehicle.findOne({ vehicleId }); // Direct match for numeric vehicleId
             if (!vehicle) {
-                return res.status(400).json({ message: 'Vehicle not found.' });
+                return res.status(400).json({ message: "Vehicle not found." });
             }
-            const updatedVehicle = await vehicleService.updateVehicleService(vehicleId, req.body, req.files);
-            if(typeof updatedVehicle === 'string'){
+            const updatedVehicle = await vehicleService.updateVehicleService(
+                vehicleId,
+                req.body,
+                req.files
+            );
+            if (typeof updatedVehicle === "string") {
                 return res.status(404).json({ message: updatedVehicle });
             }
 
-            res.status(200).json({ message: 'Vehicle updated successfully', data: updatedVehicle });
+            res
+                .status(200)
+                .json({
+                    message: "Vehicle updated successfully",
+                    data: updatedVehicle,
+                });
         } catch (error) {
-            console.error('Error updating vehicle:', error);
-            res.status(500).json({ message: 'An error occurred while updating the vehicle.' });
+            console.error("Error updating vehicle:", error);
+            res
+                .status(500)
+                .json({ message: "An error occurred while updating the vehicle." });
         }
     }
 
     // Method to delete a vehicle
     async deleteVehicle(req, res) {
         try {
-            const deletedVehicle = await vehicleService.deleteVehicleService(req.params.vehicleId);
-            if (typeof deletedVehicle === 'string') {
+            const deletedVehicle = await vehicleService.deleteVehicleService(
+                req.params.vehicleId
+            );
+            if (typeof deletedVehicle === "string") {
                 return res.status(404).json({ message: deletedVehicle });
-                };
-            res.status(200).json({ message: 'Vehicle deleted successfully', data: deletedVehicle });
+            }
+            res
+                .status(200)
+                .json({
+                    message: "Vehicle deleted successfully",
+                    data: deletedVehicle,
+                });
         } catch (error) {
             console.error(error);
             res.status(400).json({ message: error.message });
@@ -163,19 +218,31 @@ class VEHICLE {
 
     async getTotalVehicles(req, res) {
         try {
-          const agencyId = req.user.agencyId; 
-          const totalVehicleCount = await vehicleService.getTotalVehicleService(agencyId);
-          if (typeof totalVehicleCount === 'string') {
-            return res.status(400).json({ message: totalVehicleCount });
-          }
-          if (totalVehicleCount === 0) {
-            return res.status(200).json({ message: 'No vehicles found for this agency.',totalVehicle: totalVehicleCount });
-          }
-          // If vehicles are found, return the count
-          res.status(200).json({ message: 'Total vehicle count retrieved successfully.',totalVehicle: totalVehicleCount });
+            const agencyId = req.user.agencyId;
+            const totalVehicleCount = await vehicleService.getTotalVehicleService(
+                agencyId
+            );
+            if (typeof totalVehicleCount === "string") {
+                return res.status(400).json({ message: totalVehicleCount });
+            }
+            if (totalVehicleCount === 0) {
+                return res
+                    .status(200)
+                    .json({
+                        message: "No vehicles found for this agency.",
+                        totalVehicle: totalVehicleCount,
+                    });
+            }
+            // If vehicles are found, return the count
+            res
+                .status(200)
+                .json({
+                    message: "Total vehicle count retrieved successfully.",
+                    totalVehicle: totalVehicleCount,
+                });
         } catch (error) {
-          console.error(error);
-          res.status(500).json({ message: 'Failed to retrieve vehicle count' });
+            console.error(error);
+            res.status(500).json({ message: "Failed to retrieve vehicle count" });
         }
     }
 
@@ -183,45 +250,41 @@ class VEHICLE {
         try {
             const vehicleId = req.params.vehicleId;
             if (!vehicleId) {
-                return res.status(400).json({ message: 'Vehicle ID is required.' });
+                return res.status(400).json({ message: "Vehicle ID is required." });
             }
-    
+
             // Call the service to get the booking period
-            const bookingPeriod = await vehicleService.vehicleBookingPeriodService(vehicleId);
-            if (typeof bookingPeriod === 'string') {
+            const bookingPeriod = await vehicleService.vehicleBookingPeriodService(
+                vehicleId
+            );
+            if (typeof bookingPeriod === "string") {
                 return res.status(400).json({ message: bookingPeriod });
             }
             // Respond with the booking period if found
-            res.status(200).json({ message: 'Vehicle booking period retrieved successfully.',bookingPeriod: bookingPeriod });
+            res
+                .status(200)
+                .json({
+                    message: "Vehicle booking period retrieved successfully.",
+                    bookingPeriod: bookingPeriod,
+                });
         } catch (error) {
             console.error(error);
-            res.status(500).json({ message: 'An error occurred while retrieving the booking period vehicle.' });
+            res
+                .status(500)
+                .json({
+                    message:
+                        "An error occurred while retrieving the booking period vehicle.",
+                });
         }
     }
-    
-      
 }
 
 // Export an instance of the VehicleController
 const vehicleController = new VEHICLE();
 module.exports = vehicleController;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // const vehicleService = require('../../services/vehicleService');
-// const jwt = require('jsonwebtoken'); 
+// const jwt = require('jsonwebtoken');
 
 // exports.createVehicle = async (req, res) => {
 //     try {
@@ -239,7 +302,6 @@ module.exports = vehicleController;
 //     }
 // };
 
-
 // // Get all vehicles
 // exports.getVehicles = async (req, res) => {
 //     try {
@@ -247,41 +309,40 @@ module.exports = vehicleController;
 //         if (!vehicles || vehicles.length === 0) {
 //             return res.status(404).json({ message: 'No vehicles found' });
 //         }
-//         res.status(200).json({ 
-//             message: 'Vehicles retrieved successfully', 
-//             data: vehicles 
+//         res.status(200).json({
+//             message: 'Vehicles retrieved successfully',
+//             data: vehicles
 //         });
 //     } catch (error) {
 //         console.error('Error fetching vehicles:', error);
-//         res.status(500).json({ 
-//             message: error.message 
+//         res.status(500).json({
+//             message: error.message
 //         });
 //     }
 // };
 
 // exports.getRentedVehicles = async (req, res) => {
-//     try {  
+//     try {
 //         const agencyId = req.params.agencyId;
 //         console.log("agency id",agencyId)
 //         const vehicles = await vehicleService.getRentedVehicleService(agencyId);
 //         if (!vehicles || vehicles.length === 0) {
 //             return res.status(404).json({ message: 'No vehicles found' });
 //         }
-//         res.status(200).json({ 
-//             message: 'Vehicles retrieved successfully', 
-//             data: vehicles 
+//         res.status(200).json({
+//             message: 'Vehicles retrieved successfully',
+//             data: vehicles
 //         });
 //     } catch (error) {
 //         console.error('Error fetching Rented vehicles:', error);
-//         res.status(500).json({ 
-//             message: error.message 
+//         res.status(500).json({
+//             message: error.message
 //         });
 //     }
 // };
 
-
 // exports.getVehicleById = async (req, res) => {
-//     const { vehicleId } = req.params; 
+//     const { vehicleId } = req.params;
 //     console.log("Requested Vehicle ID:", vehicleId);
 
 //     if (!vehicleId) {
@@ -295,7 +356,6 @@ module.exports = vehicleController;
 //         // Call the service function to find the vehicle by ID with agency details
 //         const vehicle = await vehicleService.findVehicleByIdService(vehicleId);
 
-       
 //         if (!vehicle) {
 //             return res.status(404).json({
 //                 message: 'Vehicle not found.',
@@ -315,8 +375,6 @@ module.exports = vehicleController;
 //         });
 //     }
 // };
-
-
 
 // // Get vehicles by agency ID
 // exports.getVehiclesByAgency = async (req, res) => {
@@ -359,8 +417,6 @@ module.exports = vehicleController;
 //     }
 // };
 
-
-
 // // Delete a vehicle
 // exports.deleteVehicle = async (req, res) => {
 //     try {
@@ -370,18 +426,3 @@ module.exports = vehicleController;
 //         res.status(400).json({ message: 'Error deleting vehicle', error: error.message });
 //     }
 // };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

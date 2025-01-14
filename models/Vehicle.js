@@ -62,10 +62,6 @@ const VehicleSchema = new mongoose.Schema({
   },
   features: [String],
   images: [String],
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  },
 },
   { timestamps: true }
 );

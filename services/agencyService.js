@@ -114,18 +114,17 @@ class AGENCYSERVICE {
         try {
             const { contactEmail, password } = data;
             // Find agency by email
-            const agency = await Agency.findOne({ contactEmail });
-            if (!agency) {
-                return 'Email not Registered';
-            }
-            // Check if the password matches
-            const isPasswordValid = await bcrypt.compare(password, agency.password);
+        const agency = await Agency.findOne({ contactEmail });
+        if (!agency) {
+            return 'Email not Registered';
+        }
+        // Check if the password matches
+        const isPasswordValid = await bcrypt.compare(password, agency.password);
 
-            if (!isPasswordValid) {
-                return 'Invalid password.';
-            }
+        if (!isPasswordValid) {
+            return 'Invalid password.';
+        }
 
-            return agency;
         } catch (error) {
             console.error(error)
             return 'An error occurred while authenticating the agency.';
@@ -251,19 +250,14 @@ class AGENCYSERVICE {
 
     async getAgencyDetailsByService(agencyId) {
         try {
-            // Find the agency by ID and exclude the password field
             const agency = await Agency.findOne({ agencyId: agencyId }).select('-password');
-            console.log("service")
-            // If agency not found, throw a custom error
             if (!agency) {
-                throw new Error('Agency not found');
+                return 'Agency not found';
             }
-    
-            return agency;  // Return the agency data
+            return agency; 
         } catch (error) {
-            // Log the error and re-throw it for the controller to catch
             console.error('Error fetching agency details:', error);
-            throw new Error(error.message || 'An error occurred while fetching agency details');
+            return 'An error occurred while fetching agency details';
         }
     }
 

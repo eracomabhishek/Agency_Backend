@@ -25,7 +25,7 @@ router.get('/total-vehicle', verifyToken, vehicleController.getTotalVehicles);
 router.post('/create/vehicle', verifyToken, upload.array('images', 5), vehicleController.createVehicle); // create vehicle
 router.get('/get-all-vehicles', vehicleController.getVehicles);                       // Fetch all Vehicles with Agency name and id
 router.get('/get-vehicle-By/:vehicleId', vehicleController.getVehicleById);           // get vehicle by id
-router.get('/vehicles-with-agency/:agencyId', verifyToken, vehicleController.getVehiclesByAgency); //... Find vehicles with agency id
+router.get('/vehicles-with-agency/:agencyId', vehicleController.getVehiclesByAgency); //... Find vehicles with agency id
 router.post('/vehicle/delete/:vehicleId', vehicleController.deleteVehicle);           // for delete vehicle
 router.post('/vehicles/update/:vehicleId', upload.array('images', 5), vehicleController.updateVehicle);           // update vehic    le
 // router.get('/get-vehicle/:', vehicleController.getVehicleByRegistrationNumber) // fetch vehicle by registration number
