@@ -3,12 +3,13 @@ const router = express.Router();
 const bookingController = require("../controllers/customer/bookingController")
 const customerController = require("../controllers/customer/customerController")
 const verifyToken = require("../middleware/verifyToken");
+const customerService = require('../services/customerService');
 
 router.post('/customer/register', customerController.registerCustomer);
 router.post('/customer/login', customerController.loginCustomer);
 router.put('/customer/update', verifyToken, customerController.updateCustomer);
 router.get('/customer/rented/vehicles', verifyToken, customerController.customerRentVehicle);
-router.get('/customer-details',verifyToken, customerController.getCustomerDetails);
+router.get('/customer-details', customerController.getCustomerDetails);
 router.post('/forgot-password', customerController.forgotPassword);
 router.post('/reset-password', customerController.resetPassword);
 

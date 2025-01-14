@@ -9,5 +9,7 @@ router.get('/pendingagency', adminController.getStatusByAgency);
 router.get('/getagencydetails/:agencyId', agencyController.getAgencyDetails);
 router.post('/getvehiclebyagency/:agencyId', adminController.getVehicleWithAgencyId);
 router.post('/updateagencystatus', adminController.updateAgencyStatus);
+router.get('/alluser', adminController.getAllCustomer);
+router.get('/userdetails', adminController.getUserDetails);
 
 module.exports = router;

@@ -97,18 +97,20 @@ class CUSTOMER {
 
     async getCustomerDetails(req, res) {
         try {
-          const customerId = req.user.customerId;
-          // Find the agency by ID, excluding the password field
-          const findCustomer = await Customer.find({ customerId: customerId }).select('-password');
-      
-          if (!findCustomer) {
-            return res.status(404).json({ message: 'Agency not found' });
+          const { customerId } = req.body;
+          if(!customerId){
+            return res.status(400).json({ message: 'customer id required'})
           }
-      
-          res.status(200).json({ data: findCustomer });
+          const findCustomer = await customerService.getCustomerDetailsService(customerId);
+          if (typeof findCustomer === 'string') {
+            return res.status(404).json({ message: findCustomer});
+          }
+          return res.status(200).json({ message: 'Details fetched successfully',
+             data: findCustomer, 
+            });
         } catch (error) {
-          console.error('Error fetching agency details:', error.message);
-          res.status(500).json({ message: 'Failed to fetch agency details', error: error.message });
+          console.error(error);
+          return res.status(500).json({ message: 'Failed to fetch customer details' });
         }
     }
 

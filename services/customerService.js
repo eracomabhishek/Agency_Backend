@@ -214,6 +214,22 @@ class CUSTOMERSERVICE {
       };
     });
   }
+
+
+   async getCustomerDetailsService(customerId) {
+          try {
+            const findCustomer = await Customer.findOne({ customerId }).select('-password');
+            if (!findCustomer) {
+              return  'user not found';
+            }
+            return  findCustomer;
+          } catch (error) {
+            console.error(error);
+            return 'Server error';
+          }
+      }
+
+
 }
 
 const customerService = new CUSTOMERSERVICE();
