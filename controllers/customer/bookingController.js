@@ -7,7 +7,11 @@ class BOOKING {
     async createBooking(req, res) {
         try {
             const { customerId } = req.user; // Get customer ID from token
-            req.body.customerId = customerId;
+            if (!customerId || isNaN(customerId)) {
+                return res.status(400).json({ message: 'Invalid customer ID.' });
+            }
+
+             req.body.customerId = customerId;
 
             const { agencyId, vehicleId, startDate, endDate, startHour, endHour } = req.body;
 

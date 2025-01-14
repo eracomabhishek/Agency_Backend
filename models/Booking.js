@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-// const { addPreSaveMiddleware } = require('./Counter'); // Import the helper function
 const { generateUniqueId } = require('./Counter'); 
 
 const BookingSchema = new mongoose.Schema({
@@ -57,9 +56,6 @@ const BookingSchema = new mongoose.Schema({
 BookingSchema.pre('save', function(next) {
     generateUniqueId.call(this, 'bookingId', next);
   });
-
-// Apply the pre-save middleware for UID generation
-// addPreSaveMiddleware(BookingSchema, 'booking', 'bookingId'); // 'booking' as the counter name
 
 module.exports = mongoose.model('Booking', BookingSchema);
 

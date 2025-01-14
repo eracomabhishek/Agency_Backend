@@ -1,3 +1,5 @@
+const Vehicle = require('../../models/Vehicle');
+const Customer = require("../../models/Customer");
 const Admin = require("../../models/Admin");
 const Agency = require("../../models/Agency");
 const bcrypt = require("bcrypt");
@@ -6,9 +8,8 @@ const agencyService = require("../../services/agencyService");
 const agencyController = require("../agency/agencyController");
 const vehicleService = require("../../services/vehicleService");
 const customerService = require("../../services/customerService")
-const Customer = require("../../models/Customer");
 
-class ADMIN {
+class ADMIN {   
     async adminLogin(req, res) {
         try {
             const { email, password } = req.body;
@@ -148,7 +149,7 @@ class ADMIN {
         }
     }
 
-    async getAllCustomer(req, res) {
+    async getAllUser(req, res) {
         try {
             const customer = await Customer.find().select('-password');
             if (!customer || customer.length === 0) {
@@ -185,6 +186,27 @@ class ADMIN {
         }
     }
 
+
+  async  getCounts(req, res) {
+    try {
+        
+        const agencyCount = await Agency.countDocuments(); 
+        const vehicleCount = await Vehicle.countDocuments(); 
+        const userCount = await Customer.countDocuments(); 
+
+        return res.status(200).json({
+            message: 'Counts fetched successfully.',
+            data: {
+                agencies: agencyCount,
+                vehicles: vehicleCount,
+                users: userCount
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'An error occurred while fetching counts.' });
+    }
+}
 
 }
 

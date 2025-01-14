@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-// const { addPreSaveMiddleware } = require('./Counter');
 const { generateUniqueId } = require('./Counter'); 
 
 const BillingSchema = new mongoose.Schema({
@@ -20,23 +19,23 @@ const BillingSchema = new mongoose.Schema({
         required: true,
     },
     startDate: {
-        type: Date, // Optional: Booking start date
-        default: null,
+        type: Date
     },
     endDate: {
-        type: Date, // Optional: Booking end date
-        default: null,
+        type: Date
     },
-    hours: {
-        type: Number, // Optional: Billing duration in hours
-        default: null,
+    totalhours: {
+        type: Number
     },
-    days:{
+    endHour:{
+        type:String
+    },
+    startHour:{
+        type:String
+    },
+    totaldays:{
         type:Number,
         default:null,
-    },
-    rate:{
-        type:Number,
     },
     totalAmount: {
         type: Number,
@@ -44,20 +43,22 @@ const BillingSchema = new mongoose.Schema({
     },
     pricingMethod: {
         type: String,
-        enum: ["Days", "Hours"],
+        enum: ["pricePerDay", "pricePerHour"],
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
+    exceedCharges:{
+        type: Number,
+        default: 0,
     },
+    
 },
-  { timestamps: true }
+  { 
+    timestamps: true  
+  }
 );
 
 
 BillingSchema.pre('save', function(next) {
     generateUniqueId.call(this, 'billingId', next);
   });
-// addPreSaveMiddleware(BillingSchema, 'Billing', 'billingId');
 
 module.exports = mongoose.model("Billing", BillingSchema);
