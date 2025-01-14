@@ -9,7 +9,7 @@ router.post('/customer/register', customerController.registerCustomer);
 router.post('/customer/login', customerController.loginCustomer);
 router.put('/customer/update', verifyToken, customerController.updateCustomer);
 router.get('/customer/rented/vehicles', verifyToken, customerController.customerRentVehicle);
-router.get('/customer-details', customerController.getCustomerDetails);
+router.get('/customer-details/:customerId', customerController.getCustomerDetails);
 router.post('/forgot-password', customerController.forgotPassword);
 router.post('/reset-password', customerController.resetPassword);
 

@@ -97,7 +97,7 @@ class CUSTOMER {
 
     async getCustomerDetails(req, res) {
         try {
-          const { customerId } = req.body;
+          const customerId  = req.params.customerId;
           if(!customerId){
             return res.status(400).json({ message: 'customer id required'})
           }

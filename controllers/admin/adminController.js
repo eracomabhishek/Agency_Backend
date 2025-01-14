@@ -167,7 +167,7 @@ class ADMIN {
 
     async getUserDetails(req, res) {
         try {
-            const { customerId } = req.body;
+            const customerId = req.params.customerId;
             if (!customerId) {
                 return res.status(400).json({ message: "Customer ID is required." });
             }
@@ -207,7 +207,7 @@ class ADMIN {
     }
     }
 
-    
+
 
 }
 
