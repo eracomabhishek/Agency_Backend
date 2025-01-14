@@ -218,7 +218,7 @@ class CUSTOMERSERVICE {
 
    async getCustomerDetailsService(customerId) {
           try {
-            const findCustomer = await Customer.findOne({ customerId }).select('-password');
+            const findCustomer = await Customer.find({ customerId }).select('-password');
             if (!findCustomer) {
               return  'user not found';
             }
