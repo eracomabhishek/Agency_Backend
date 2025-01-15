@@ -62,28 +62,33 @@ class ADMIN {
                     message: "Status query parameter is required.",
                 });
             }
-
-            const validStatuses = ["Pending", "Approved", "Rejected"];
+        
+            const validStatuses = ["Pending", "Approved", "Rejected", "All"];
             if (!validStatuses.includes(status)) {
                 return res.status(400).json({
                     message:
-                        'Invalid status. Please provide either "Pending" or "Approved".',
+                        'Invalid status. Please provide Pending, Approved, Rejected, or All.',
                 });
             }
-
-            const agencies = await Agency.find({ status: status });
-            const totalCount = await Agency.countDocuments({ status: status });
-
-            // Check if no agencies are found for the provided status
+        console.log("aaaaaaa")
+            // Define a filter condition based on the status
+            const filter = status === "All" ? {} : { status: status };
+        
+            // Fetch agencies based on the filter
+            const agencies = await Agency.find(filter);
+            const totalCount = await Agency.countDocuments(filter);
+        
+            // Check if no agencies are found
             if (agencies.length === 0) {
                 return res.status(404).json({
-                    message: `No ${status} agencies found.`,
+                    message: `No ${status === "All" ? "" : status} agencies found.`,
                     totalCount: 0,
                 });
             }
+        
             // Return the filtered list of agencies and total count
             res.status(200).json({
-                message: `${status} agencies fetched successfully`,
+                message: `${status === "All" ? "All" : status} agencies fetched successfully`,
                 totalCount: totalCount,
                 data: agencies,
             });
@@ -91,6 +96,7 @@ class ADMIN {
             console.error("Error fetching agencies:", error);
             res.status(500).json({ message: "Error fetching agencies" });
         }
+        
     }
 
     async getVehicleWithAgencyId(req, res) {

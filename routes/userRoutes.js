@@ -7,7 +7,7 @@ const customerService = require('../services/customerService');
 
 router.post('/customer/register', customerController.registerCustomer);
 router.post('/customer/login', customerController.loginCustomer);
-router.put('/customer/update',  customerController.updateCustomer);
+router.post('/customer/update',  customerController.updateCustomer);
 router.get('/customer/rented/vehicles', verifyToken, customerController.customerRentVehicle);
 router.get('/customer-details/:customerId', customerController.getCustomerDetails);
 router.post('/forgot-password', customerController.forgotPassword);
