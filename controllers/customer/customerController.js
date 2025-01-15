@@ -78,10 +78,16 @@ class CUSTOMER {
             }
             const updatedCustomer = await customerService.updateCustomerService( customerId,updateData);
             // Respond with the updated agency profile
-            return res.status(200).json({ message: updatedCustomer });
+            if (!updatedCustomer.status) {
+                return res.status(400).json({ message: updatedCustomer.message });
+            }
+            return res.status(200).json({ message: updatedCustomer.message,
+                data: updatedCustomer.data,
+            });
+            
         } catch (error) {
             console.error('Profile update error:', error);
-            return res.status(500).json({ message: 'Server error try again later' });
+            return res.status(500).json({ message: 'Server error try again' });
         }
     }
     

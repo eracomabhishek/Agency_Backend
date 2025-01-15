@@ -92,15 +92,12 @@ class AGENCY {
             }
             const updatedAgency = await agencyService.updateAgencyProfileService(agencyId, updateData);
 
-            if (updatedAgency) {
-                return res.status(400).json({ message: updatedAgency });
+            if (!updatedAgency.status) {
+                return res.status(400).json({ message: updatedAgency.message });
             }
-
-            // Respond with the updated agency profile
-            // return res.status(200).json({
-            //     message: "Profile updated successfully",
-            //     updatedAgency,
-            // });
+            return res.status(200).json({ message: updatedAgency.message,
+                data: updatedAgency.data,
+            });
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Server error try again later' });

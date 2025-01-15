@@ -83,13 +83,13 @@ class CUSTOMERSERVICE {
   }
 
   // Validate login data
-  validateLoginData(data) {
-    const { email, password } = data;
+  // validateLoginData(data) {
+  //   const { email, password } = data;
 
-    if (!email || !password) {
-      return "Email and password are required.";
-    }
-  }
+  //   if (!email || !password) {
+  //     return "Email and password are required.";
+  //   }
+  // }
 
   // Service: Login a customer
   async authenticateCustomer(email, password) {
@@ -112,19 +112,19 @@ class CUSTOMERSERVICE {
     try {
       const customer = await Customer.findOne({ customerId: customerId });
         if (!customer) {
-          return "Customer not found.";
+          return { status: false, message: 'Customer not found.' };
         }
 
         // Validate email if provided
-        if (updatedData.email && updatedCustomer.email !== customer.email) {
-          if (!isValidEmail(updatedData.email)) {
-            return "Invalid email format.";
+        if (updatedData.email && updatedData.email !== customer.email) {
+          if (!validationUtils.isValidEmail(updatedData.email)) {
+            return { status: false, message: 'Invalid email format.' };
           }
 
           // Check if email already exists
           const existingEmail = await Customer.findOne({email: updatedData.email });
           if (existingEmail && existingEmail._id.toString() !== customerId) {
-            return "Email is already in use.";
+            return { status: false, message: 'Email is already in use.' };
           }
         }
 
@@ -132,13 +132,13 @@ class CUSTOMERSERVICE {
         if (
           updatedData.phoneNumber && updatedData.phoneNumber !== customer.phoneNumber
         ) {
-          if (!isValidPhoneNumber(updatedData.phoneNumber)) {
-            return "Invalid phone number format.";
+          if (!validationUtils.isValidPhoneNumber(updatedData.phoneNumber)) {
+            return { status: false, message: 'Invalid phone number format.' };
           }
           const existingPhone = await Customer.findOne({ phoneNumber: updatedData.phoneNumber,
           });
           if (existingPhone && existingPhone._id.toString() !== customerId) {
-            return "Phone number is already in use.";
+            return { status: false, message: 'Phone number is already in use.' };
           }
         }
         // Merge the existing address with the updated address fields if address is provided
@@ -166,15 +166,14 @@ class CUSTOMERSERVICE {
 
         // If no customer is found or update failed
         if (!updatedCustomer) {
-          return "Customer update failed.";
+          return { status: false, message: 'Customer update failed.' };
         }
 
-        return 'Profile updated successfully'; 
+        return { status: true, message: 'Profile updated successfully', data: updatedCustomer };
 
     } catch (error) {
         console.error(error);
-        return " Internal server error Customer update failed.";
-    }
+        return { status: false, message: 'Internal server error updating customer profile.' };    }
         
         
   }

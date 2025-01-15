@@ -14,5 +14,7 @@ router.get('/userdetails/:customerId', adminController.getUserDetails);
 router.get('/allcounts', adminController.getCounts);
 router.post('/deleteuser/:customerId', adminController.deleteUser);
 router.post('/deleteagency/:agencyId', adminController.deleteAgency);
+router.put('/updateagency', adminController.updateAgencyProfile);
+router.put('/updateuser', adminController.updateUserProfile);
 
 module.exports = router;

@@ -249,6 +249,37 @@ class ADMIN {
         }
     }
 
+    async updateAgencyProfile(req,res) {
+        try {
+            const { agencyId, ...updatedData} = req.body;
+            const updatedAgency = await agencyService.updateAgencyProfileService(agencyId, updatedData);
+            if (!updatedAgency.status) {
+                return res.status(400).json({ message: updatedAgency.message });
+            }
+            return res.status(200).json({ message: updatedAgency.message,
+                data: updatedAgency.data,
+            });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error while update Agency Profile' });
+        }
+    }
+    async updateUserProfile(req,res) {
+        try {
+            const { customerId, ...updatedData} = req.body;
+            const updatedCustomer = await customerService.updateCustomerService(customerId, updatedData);
+            if (!updatedCustomer.status) {
+                return res.status(400).json({ message: updatedCustomer.message });
+            }
+            return res.status(200).json({ message: updatedCustomer.message,
+                data: updatedCustomer.data,
+            });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'Internal server error while update Customer Profile' });
+        }
+    }
+
 }
 
 const adminController = new ADMIN();

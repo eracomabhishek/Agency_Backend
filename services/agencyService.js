@@ -137,30 +137,30 @@ class AGENCYSERVICE {
             const agency = await Agency.findOne({ agencyId: agencyId });
 
             if (!agency) {
-                return 'Agency not found.';
+                return { status: false, message: 'Agency not found.' };
             }
 
             // validate email
             if (updatedData.contactEmail && updatedData.contactEmail !== agency.contactEmail) {
                 if (!validationUtils.isValidEmail(updatedData.contactEmail)) {
-                    return 'Invalid email format.';
+                    return { status: false, message: 'Invalid email format.' };
                 }
                 const existingEmail = await Agency.findOne({ contactEmail: updatedData.contactEmail });
                 if (existingEmail && existingEmail._id.toString() !== agencyId) {
-                    return 'Email is already in use by another agency.';
+                    return { status: false, message: 'Email is already in use' };
                 }
             }
 
             // Validate phone number if provided
             if (updatedData.phoneNumber && updatedData.phoneNumber !== agency.phoneNumber) {
                 if (!validationUtils.isValidPhoneNumber(updatedData.phoneNumber)) {
-                    return 'Invalid phone number format.';
+                    return { status: false, message: 'Invalid phone number format.' };
                 }
 
                 // Check if phone number already exists
                 const existingPhone = await Agency.findOne({ phoneNumber: updatedData.phoneNumber });
                 if (existingPhone && existingPhone._id.toString() !== agencyId) {
-                    return 'Phone number is already in use.';
+                    return { status: false, message: 'Phone number is already in use.' };
                 }
             }
 
@@ -168,7 +168,7 @@ class AGENCYSERVICE {
             if (updatedData.businessLicenseNumber && updatedData.businessLicenseNumber !== agency.businessLicenseNumber) {
                 const existingLicense = await Agency.findOne({ businessLicenseNumber: updatedData.businessLicenseNumber });
                 if (existingLicense && existingLicense._id.toString() !== agencyId) {
-                    return 'Business License Number is already in use.';
+                    return { status: false, message: 'Business License Number is already in use.' };
                 }
             }
 
@@ -176,7 +176,7 @@ class AGENCYSERVICE {
             if (updatedData.agencyName && updatedData.agencyName !== agency.agencyName) {
                 const existingAgency = await Agency.findOne({ agencyName: updatedData.agencyName });
                 if (existingAgency && existingAgency._id.toString() !== agencyId) {
-                    return 'Agency name is already in use.';
+                    return { status: false, message: 'Agency name is already in use.' };
                 }
             }
 
@@ -206,14 +206,14 @@ class AGENCYSERVICE {
             );
 
             if (!updatedAgency) {
-                return 'Agency update failed.';
+                return { status: false, message: 'Agency update failed.' };
             }
 
-            return 'Profile updated successfully'; 
+            return { status: true, message: 'Profile updated successfully', data: updatedAgency };
         }
         catch (error) {
             console.error(error);
-            return 'Internal server error updating agency profile.';
+            return { status: false, message: 'Internal server error updating agency profile.' };
         }
 
     }
