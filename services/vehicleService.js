@@ -150,7 +150,7 @@ class VEHICLESERVICE {
     }
     
 
-    async deleteVehicleService(vehicleId) {
+    async   deleteVehicleService(vehicleId) {
         try {
             const deletedVehicle = await Vehicle.findOneAndDelete({ vehicleId });
             if (!deletedVehicle) {

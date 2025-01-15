@@ -12,8 +12,8 @@ router.post('/updateagencystatus', adminController.updateAgencyStatus);
 router.get('/alluser', adminController.getAllUser);
 router.get('/userdetails/:customerId', adminController.getUserDetails);
 router.get('/allcounts', adminController.getCounts);
-router.post('/deleteuser/:customerId', adminController.deleteUser);
-router.post('/deleteagency/:agencyId', adminController.deleteAgency);
+router.delete('/deleteuser', adminController.deleteUser);
+router.delete('/deleteagency', adminController.deleteAgency);
 router.put('/updateagency', adminController.updateAgencyProfile);
 router.put('/updateuser', adminController.updateUserProfile);
 

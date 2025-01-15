@@ -215,15 +215,15 @@ class ADMIN {
 
     async deleteUser(req, res) {
         try {
-            const customerId = req.params.customerId;
+            const { customerId } = req.body;
             if (!customerId) {
                 return res.status(400).json({ message: "Customer ID is required." });
             }
             const findCustomer = await Customer.findOneAndDelete({ customerId: customerId });
             if (!findCustomer || findCustomer.length === 0) {
-                return res.status(400).json({ message: "Customer not found." });
+                return res.status(400).json({ message: "User not found." });
             }
-            return res.status(200).json({ message: 'user deleted successfully' });
+            return res.status(200).json({ message: 'User deleted successfully' });
 
         } catch (error) {
             console.error(error);
@@ -233,7 +233,7 @@ class ADMIN {
 
     async deleteAgency(req, res) {
         try {
-            const agencyId = req.params.agencyId;
+            const { agencyId } = req.body;
             if (!agencyId) {
                 return res.status(400).json({ message: "Agency ID is required." });
             }
@@ -264,6 +264,7 @@ class ADMIN {
             return res.status(500).json({ message: 'Internal server error while update Agency Profile' });
         }
     }
+
     async updateUserProfile(req,res) {
         try {
             const { customerId, ...updatedData} = req.body;

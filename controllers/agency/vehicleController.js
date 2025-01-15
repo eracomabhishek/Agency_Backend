@@ -163,9 +163,7 @@ class VEHICLE {
     // Method to delete a vehicle
     async deleteVehicle(req, res) {
         try {
-            const deletedVehicle = await vehicleService.deleteVehicleService(
-                req.params.vehicleId
-            );
+            const deletedVehicle = await vehicleService.deleteVehicleService( req.params.vehicleId );
             if (typeof deletedVehicle === "string") {
                 return res.status(404).json({ message: deletedVehicle });
             }
