@@ -209,11 +209,11 @@ class AGENCYSERVICE {
                 return 'Agency update failed.';
             }
 
-            return updatedAgency; // Return the updated agency profile
+            return 'Profile updated successfully'; 
         }
         catch (error) {
             console.error(error);
-            return 'Error updating agency profile.';
+            return 'Internal server error updating agency profile.';
         }
 
     }

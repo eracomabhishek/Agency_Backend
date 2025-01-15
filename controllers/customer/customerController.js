@@ -63,18 +63,25 @@ class CUSTOMER {
     // Method to update customer details
     async updateCustomer(req, res) {
         try {
-            // const customerId = req.user.customerId; 
-            // Pass the user ID and updated data to the service layer
-            const updatedCustomer = await customerService.updateCustomerService(req.body);
-
+            const { password, customerId, ...updateData } = req.body;
+            if (!password) {
+                return res.status(400).json({ message: "Password is required to update the profile." });
+            }
+            const customer = await Customer.findOne({ customerId });
+            if (!customer) {
+                return res.status(400).json({ message: "Customer not found." });
+            }
+            // Verify the provided password
+            const isPasswordValid = await bcrypt.compare(password, customer.password); 
+            if (!isPasswordValid) {
+                return res.status(400).json({ message: "Invalid password. Update failed." });
+            }
+            const updatedCustomer = await customerService.updateCustomerService( customerId,updateData);
             // Respond with the updated agency profile
-            return res.status(200).json({
-                message: 'Profile updated successfully',
-                updatedCustomer,
-            });
+            return res.status(200).json({ message: updatedCustomer });
         } catch (error) {
-            console.error('Profile update error:', error.message);
-            return res.status(400).json({ message: error.message });
+            console.error('Profile update error:', error);
+            return res.status(500).json({ message: 'Server error try again later' });
         }
     }
     

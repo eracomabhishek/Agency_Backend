@@ -13,7 +13,7 @@ router.get('/vehicle/options', paginationService.fetchOptions);
 // Agency routes
 router.post('/agencies', agencyController.createAgency);                        // create agency
 router.post('/loginAgency', agencyController.loginAgency);                      // login  agency
-router.post('/update/agency',verifyToken, agencyController.updateAgencyProfile); // update agency
+router.put('/update/agency', agencyController.updateAgencyProfile); // update agency
 router.get('/agency-details/:agencyId', agencyController.getAgencyDetails);                             // get agency
 router.get('/booking-count', verifyToken, agencyController.getBookingCount);
 router.post('/agency-forgot-password', agencyController.forgotPassword);

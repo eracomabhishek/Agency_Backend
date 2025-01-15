@@ -18,10 +18,11 @@ class AGENCY {
             }
 
             const savedAgency = await agencyService.createAgencyService(data);
-            if(typeof savedAgency === 'string'){
+            if (typeof savedAgency === 'string') {
                 return res.status(400).json({ message: savedAgency });
             }
-            return res.status(200).json({ message: "Agency created successfully",
+            return res.status(200).json({
+                message: "Agency created successfully",
                 data: savedAgency,
             });
         } catch (error) {
@@ -76,22 +77,33 @@ class AGENCY {
     // Method to update agency profile
     async updateAgencyProfile(req, res) {
         try {
-            const agencyId = req.user.agencyId;
-
-            // Pass the user ID and updated data to the service layer
-            const updatedAgency = await agencyService.updateAgencyProfileService( agencyId,req.body );
+            const { password, agencyId, ...updateData } = req.body;
+            if (!password) {
+                return res.status(400).json({ message: "Password is required to update the profile." });
+            }
+            const agency = await Agency.findOne({ agencyId });
+            if (!agency) {
+                return res.status(400).json({ message: "Agency not found." });
+            }
+            // Verify the provided password
+            const isPasswordValid = await bcrypt.compare(password, agency.password);
+            if (!isPasswordValid) {
+                return res.status(400).json({ message: "Invalid password. Update failed." });
+            }
+            const updatedAgency = await agencyService.updateAgencyProfileService(agencyId, updateData);
 
             if (updatedAgency) {
                 return res.status(400).json({ message: updatedAgency });
             }
 
             // Respond with the updated agency profile
-            return res.status(200).json({  message: "Profile updated successfully",
-                 updatedAgency, 
-                });
+            // return res.status(200).json({
+            //     message: "Profile updated successfully",
+            //     updatedAgency,
+            // });
         } catch (error) {
-            console.error("Profile update error:", error.message);
-            return res.status(500).json({ message: error.message });
+            console.error(error);
+            return res.status(500).json({ message: 'Server error try again later' });
         }
     }
 

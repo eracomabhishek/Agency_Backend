@@ -62,25 +62,24 @@ class CUSTOMERSERVICE {
   // Service: Register a new customer
   async registerCustomerService(data) {
     try {
-        const { fullName, email, phoneNumber, password, address } = data;
-        const hashedPassword = await bcrypt.hash(password, 10);
-    
-        // Create a new customer object
-        const customer = new Customer({
-          fullName,
-          email,
-          phoneNumber,
-          password: hashedPassword,
-          address,
-        });
-    
-        // Save the customer to the database
-        return await customer.save();
+      const { fullName, email, phoneNumber, password, address } = data;
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create a new customer object
+      const customer = new Customer({
+        fullName,
+        email,
+        phoneNumber,
+        password: hashedPassword,
+        address,
+      });
+
+      // Save the customer to the database
+      return await customer.save();
     } catch (error) {
-        console.error(error);
-        return ;
+      console.error(error);
+      return;
     }
-   
   }
 
   // Validate login data
@@ -88,7 +87,7 @@ class CUSTOMERSERVICE {
     const { email, password } = data;
 
     if (!email || !password) {
-      return"Email and password are required.";
+      return "Email and password are required.";
     }
   }
 
@@ -96,7 +95,7 @@ class CUSTOMERSERVICE {
   async authenticateCustomer(email, password) {
     const customer = await Customer.findOne({ email });
     if (!customer) {
-       return "Email not registered";
+      return "Email not registered";
     }
 
     // Compare the provided password with the hashed password
@@ -109,86 +108,75 @@ class CUSTOMERSERVICE {
   }
 
   // Service: Update customer details
-  async updateCustomerService(updatedData) {
-    // Find the customer by ID and update
-    const { customerId } = updatedData;
-    const customer = await Customer.findOne({ customerId: customerId });
-    if (!customer) {
-      return "Customer not found.";
-    }
+  async updateCustomerService(customerId, updatedData) {
+    try {
+      const customer = await Customer.findOne({ customerId: customerId });
+        if (!customer) {
+          return "Customer not found.";
+        }
 
-    // Validate email if provided
-    if (updatedData.email && updatedCustomer.email !== customer.email) {
-      if (!isValidEmail(updatedData.email)) {
-        return "Invalid email format.";
-      }
+        // Validate email if provided
+        if (updatedData.email && updatedCustomer.email !== customer.email) {
+          if (!isValidEmail(updatedData.email)) {
+            return "Invalid email format.";
+          }
 
-      // Check if email already exists
-      const existingEmail = await Customer.findOne({ email: updatedData.email });
-      if (existingEmail && existingEmail._id.toString() !== customerId) {
-        return "Email is already in use.";
-      }
-    }
+          // Check if email already exists
+          const existingEmail = await Customer.findOne({email: updatedData.email });
+          if (existingEmail && existingEmail._id.toString() !== customerId) {
+            return "Email is already in use.";
+          }
+        }
 
-   
-    // Validate phone number if provided
-    if (updatedData.phoneNumber && updatedData.phoneNumber !== customer.phoneNumber) {
-      if (!isValidPhoneNumber(updatedData.phoneNumber)) {
-       return "Invalid phone number format.";
-      }
-      const existingPhone = await Customer.findOne({ phoneNumber: updatedData.phoneNumber });
-      if (existingPhone && existingPhone._id.toString() !== customerId) {
-        return "Phone number is already in use.";
-      }
-    }
+        // Validate phone number if provided
+        if (
+          updatedData.phoneNumber && updatedData.phoneNumber !== customer.phoneNumber
+        ) {
+          if (!isValidPhoneNumber(updatedData.phoneNumber)) {
+            return "Invalid phone number format.";
+          }
+          const existingPhone = await Customer.findOne({ phoneNumber: updatedData.phoneNumber,
+          });
+          if (existingPhone && existingPhone._id.toString() !== customerId) {
+            return "Phone number is already in use.";
+          }
+        }
         // Merge the existing address with the updated address fields if address is provided
         let updatedAddress = customer.address;
         if (updatedData.address) {
-            updatedAddress = {
-                ...customer.address.toObject(), // Convert Mongoose subdocument to plain object
-                ...updatedData.address, // Merge with updated fields
-            };
+          updatedAddress = {
+            ...customer.address.toObject(), // Convert Mongoose subdocument to plain object
+            ...updatedData.address, // Merge with updated fields
+          };
         }
 
-     const updatedCustomer = await Customer.findOneAndUpdate(
-        { customerId: customerId },  // filter to find the customer by customerId
-        { 
+        const updatedCustomer = await Customer.findOneAndUpdate(
+          { customerId: customerId }, // filter to find the customer by customerId
+          {
             $set: {
-                fullName: updatedData.fullName,
-                email: updatedData.email,
-                phoneNumber: updatedData.phoneNumber,
-                address: updatedAddress,  // Assuming address is passed in updatedData directly
-                password: updatedData.password,
-            }
-        },  // fields to update
-        { new: true }  // return the updated document
-    );
+              fullName: updatedData.fullName,
+              email: updatedData.email,
+              phoneNumber: updatedData.phoneNumber,
+              address: updatedAddress, // Assuming address is passed in updatedData directly
+              password: updatedData.password,
+            },
+          }, // fields to update
+          { new: true } // return the updated document
+        );
 
-    // If no customer is found or update failed
-    if (!updatedCustomer) {
-        return 'Customer update failed.';
+        // If no customer is found or update failed
+        if (!updatedCustomer) {
+          return "Customer update failed.";
+        }
+
+        return 'Profile updated successfully'; 
+
+    } catch (error) {
+        console.error(error);
+        return " Internal server error Customer update failed.";
     }
-
-    return updatedCustomer; // Return the updated customer profile
-
-    // Update fields if they are present in the updatedData
-    // if (updatedData.fullName) customer.fullName = updatedData.fullName;
-    // if (updatedData.email) customer.email = updatedData.email;
-    // if (updatedData.phoneNumber) customer.phoneNumber = updatedData.phoneNumber;
-
-    // if (updatedData.address) {
-    //   customer.address = {
-    //     ...customer.address.toObject(), // Convert Mongoose subdocument to plain object
-    //     ...updatedData.address, // Merge with updated fields
-    //   };
-    // }
-
-    // if (updatedData.password) customer.password = updatedData.password;
-
-    // // Save the updated customer document
-    // const updatedCustomer = await customer.save();
-
-    // return updatedCustomer; // Return the updated customer profile
+        
+        
   }
 
   // Get vehicles rented by a user
@@ -216,21 +204,20 @@ class CUSTOMERSERVICE {
     });
   }
 
-
-   async getCustomerDetailsService(customerId) {
-          try {
-            const findCustomer = await Customer.find({ customerId }).select('-password');
-            if (!findCustomer) {
-              return  'user not found';
-            }
-            return  findCustomer;
-          } catch (error) {
-            console.error(error);
-            return 'Server error';
-          }
+  async getCustomerDetailsService(customerId) {
+    try {
+      const findCustomer = await Customer.find({ customerId }).select(
+        "-password"
+      );
+      if (!findCustomer) {
+        return "user not found";
       }
-
-
+      return findCustomer;
+    } catch (error) {
+      console.error(error);
+      return "Server error";
+    }
+  }
 }
 
 const customerService = new CUSTOMERSERVICE();
