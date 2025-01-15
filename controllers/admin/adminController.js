@@ -9,7 +9,7 @@ const agencyController = require("../agency/agencyController");
 const vehicleService = require("../../services/vehicleService");
 const customerService = require("../../services/customerService")
 
-class ADMIN {   
+class ADMIN {
     async adminLogin(req, res) {
         try {
             const { email, password } = req.body;
@@ -186,28 +186,62 @@ class ADMIN {
         }
     }
 
-   async  getCounts(req, res) {
-    try {
-        
-        const agencyCount = await Agency.countDocuments(); 
-        const vehicleCount = await Vehicle.countDocuments(); 
-        const userCount = await Customer.countDocuments(); 
+    async getCounts(req, res) {
+        try {
 
-        return res.status(200).json({
-            message: 'Counts fetched successfully.',
-            data: {
-                agencies: agencyCount,
-                vehicles: vehicleCount,
-                users: userCount
+            const agencyCount = await Agency.countDocuments();
+            const vehicleCount = await Vehicle.countDocuments();
+            const userCount = await Customer.countDocuments();
+
+            return res.status(200).json({
+                message: 'Counts fetched successfully.',
+                data: {
+                    agencies: agencyCount,
+                    vehicles: vehicleCount,
+                    users: userCount
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: 'An error occurred while fetching counts.' });
+        }
+    }
+
+    async deleteUser(req, res) {
+        try {
+            const customerId = req.params.customerId;
+            if (!customerId) {
+                return res.status(400).json({ message: "Customer ID is required." });
             }
-        });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'An error occurred while fetching counts.' });
-    }
+            const findCustomer = await Customer.findOneAndDelete({ customerId: customerId });
+            if (!findCustomer || findCustomer.length === 0) {
+                return res.status(400).json({ message: "Customer not found." });
+            }
+            return res.status(200).json({ message: 'user deleted successfully' });
+
+        } catch (error) {
+            console.error(error);
+            return res.status(400).json({ message: 'Internal server error while delete user'})
+        }
     }
 
+    async deleteAgency(req, res) {
+        try {
+            const agencyId = req.params.agencyId;
+            if (!agencyId) {
+                return res.status(400).json({ message: "Agency ID is required." });
+            }
+            const findAgency = await Agency.findOneAndDelete({ agencyId: agencyId });
+            if (!findAgency || findAgency.length === 0) {
+                return res.status(400).json({ message: "Agency not found." });
+            }
+            return res.status(200).json({ message: 'Agency deleted successfully' });
 
+        } catch (error) {
+            console.error(error);
+            return res.status(400).json({ message: 'Internal server error while delete Agency'})
+        }
+    }
 
 }
 

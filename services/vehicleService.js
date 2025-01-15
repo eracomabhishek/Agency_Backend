@@ -55,12 +55,12 @@ class VEHICLESERVICE {
             }
             const vehicle = await Vehicle.findOne({ vehicleId });
             if (!vehicle) {
-                return 'Vehicle not found in service.';
+                return 'Vehicle does not exist.';
             }
             return vehicle;
         } catch (error) {
-            console.error('Error in findVehicleById service:', error.message);
-            return null;
+            console.error(error);
+            return 'Internaal server error';
         }
     }
 

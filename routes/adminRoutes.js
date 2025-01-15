@@ -12,5 +12,7 @@ router.post('/updateagencystatus', adminController.updateAgencyStatus);
 router.get('/alluser', adminController.getAllUser);
 router.get('/userdetails/:customerId', adminController.getUserDetails);
 router.get('/allcounts', adminController.getCounts);
+router.post('/deleteuser/:customerId', adminController.deleteUser);
+router.post('/deleteagency/:agencyId', adminController.deleteAgency);
 
 module.exports = router;

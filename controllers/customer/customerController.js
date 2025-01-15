@@ -16,9 +16,9 @@ class CUSTOMER {
                 return res.status(400).json({ message: validationError });
             }
             const customer = await customerService.registerCustomerService(req.body);
-            res.status(201).json({ success: true, data: customer });
+            return res.status(201).json({ data: customer });
         } catch (error) {           
-            res.status(400).json({ message: error.message });
+            return res.status(400).json({ message: error.message });
         }
     }
 
@@ -34,7 +34,9 @@ class CUSTOMER {
                 }
 
             const customer = await customerService.authenticateCustomer(email, password);
-
+                if( typeof customer === 'string'){
+                    return res.status(400).json({ message: customer });
+                }
             const payload = {
                 customerId: customer.customerId,
                 role: "user"
@@ -48,31 +50,31 @@ class CUSTOMER {
             console.log("payload", payload)
 
             // Respond with the token
-            res.status(200).json({
+            return res.status(200).json({
                 message: 'Login successful',
                 token,
             });
         } catch (error) {
             console.error('Login error:', error.message);
-            res.status(401).json({ message: error.message });
+            return res.status(401).json({ message: error.message });
         }
     }
 
     // Method to update customer details
     async updateCustomer(req, res) {
         try {
-            const customerId = req.user.customerId; 
+            // const customerId = req.user.customerId; 
             // Pass the user ID and updated data to the service layer
-            const updatedCustomer = await customerService.updateCustomerService(customerId, req.body);
+            const updatedCustomer = await customerService.updateCustomerService(req.body);
 
             // Respond with the updated agency profile
-            res.status(200).json({
+            return res.status(200).json({
                 message: 'Profile updated successfully',
                 updatedCustomer,
             });
         } catch (error) {
             console.error('Profile update error:', error.message);
-            res.status(400).json({ message: error.message });
+            return res.status(400).json({ message: error.message });
         }
     }
     
@@ -83,13 +85,13 @@ class CUSTOMER {
             // Fetch rented vehicles for the user
             const rentedVehicles = await customerService.getUserRentedVehiclesService(customerId);
     
-            res.status(200).json({
+            return res.status(200).json({
                 message: 'Rented vehicles retrieved successfully',
                 data: rentedVehicles,
             });
         } catch (error) {
             console.error('Error fetching rented vehicles:', error);
-            res.status(500).json({
+            return res.status(500).json({
                 message: error.message,
             });
         }

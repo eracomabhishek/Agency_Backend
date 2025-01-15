@@ -109,8 +109,9 @@ class CUSTOMERSERVICE {
   }
 
   // Service: Update customer details
-  async updateCustomerService(customerId, updatedData) {
+  async updateCustomerService(updatedData) {
     // Find the customer by ID and update
+    const { customerId } = updatedData;
     const customer = await Customer.findOne({ customerId: customerId });
     if (!customer) {
       return "Customer not found.";

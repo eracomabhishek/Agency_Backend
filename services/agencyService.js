@@ -87,7 +87,7 @@ class AGENCYSERVICE {
         }
         catch (error) {
             console.error(error);
-            return 'An error occurred while creating the agency.';
+            return 'Internal server error while creating the agency.';
         }
 
     }
@@ -180,6 +180,14 @@ class AGENCYSERVICE {
                 }
             }
 
+            let updatedAddress = agency.officeAddress;
+           if (updatedData.officeAddress) {
+            updatedAddress = {
+                ...agency.officeAddress.toObject(), // Convert Mongoose subdocument to plain object
+                ...updatedData.officeAddress, // Merge with updated fields
+            };
+        }
+
             // Use findOneAndUpdate to update the agency profile in a single operation
             const updatedAgency = await Agency.findOneAndUpdate(
                 { agencyId: agencyId },  // filter to find the agency
@@ -190,7 +198,7 @@ class AGENCYSERVICE {
                         contactEmail: updatedData.contactEmail,
                         phoneNumber: updatedData.phoneNumber,
                         businessLicenseNumber: updatedData.businessLicenseNumber,
-                        officeAddress: updatedData.officeAddress,
+                        officeAddress: updatedAddress,
                         serviceLocations: updatedData.serviceLocations,
                     }
                 },  // fields to update
