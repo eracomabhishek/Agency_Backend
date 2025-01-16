@@ -173,18 +173,17 @@ class ADMIN {
 
     async getUserDetails(req, res) {
         try {
-            const customerId = req.params.customerId;
+            const { customerId } = req.params
+            console.log("customer id ", customerId);
             if (!customerId) {
                 return res.status(400).json({ message: "Customer ID is required." });
             }
             const findCustomer = await customerService.getCustomerDetailsService(customerId);
-            if (typeof findCustomer === 'string') {
-                return res.status(404).json({ message: findCustomer });
+            if (!findCustomer.status) {
+                return res.status(400).json({ message: findCustomer.message });
             }
-
-            return res.status(200).json({
-                message: 'Details fetched successfully',
-                data: findCustomer,
+            return res.status(200).json({ message: findCustomer.message,
+                data: findCustomer.data,
             });
         } catch (error) {
             console.error(error);
@@ -278,6 +277,25 @@ class ADMIN {
         } catch (error) {
             console.error(error);
             return res.status(500).json({ message: 'Internal server error while update Customer Profile' });
+        }
+    }
+
+    async deleteVehicle(req,res) {
+        try {
+            const { vehicleId } = req.params;
+            console.log("vehicle id in admin:", vehicleId)
+            if (!vehicleId) {
+                return res.status(400).json({ message: "Vehicle ID is required." });
+            }
+            const vehicle = await vehicleService.deleteVehicleService(vehicleId);
+            if (!vehicle.status) {
+                return res.status(400).json({ message: vehicle.message });
+            }
+            return res.status(200).json({ message: vehicle.message,
+                data: vehicle.data,
+            });
+        } catch (error) {
+            
         }
     }
 

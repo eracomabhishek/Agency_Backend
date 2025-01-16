@@ -53,6 +53,10 @@ class BOOKINGSERVICE {
   // Update booking status
   async updateBookingStatusService(bookingId, { bookingStatus, paymentStatus }) {
     try {
+        const numericBookingId = Number(bookingId);
+        if (isNaN(numericBookingId)) {
+            return {status:false, message:'Invalid bookingId: must be a number'};
+        }
         // Prepare the update object
         const updateData = {};
         if (bookingStatus !== undefined) {
@@ -62,20 +66,20 @@ class BOOKINGSERVICE {
             updateData.paymentStatus = paymentStatus;
         }
         // Update the booking using findByIdAndUpdate
-        const updatedBooking = await Booking.findByIdAndUpdate(
-            bookingId, 
+        const updatedBooking = await Booking.findOneAndUpdate(
+             {bookingId:numericBookingId}, 
             { $set: updateData },
             { new: true } 
         );
 
         // Check if the booking was found and updated
         if (!updatedBooking) {
-            return 'Booking not found.';
+            return { status:false, message:'Booking not found.'};
         }
-        return updatedBooking;
+        return { status:true,message:'successfully updated ', data: updatedBooking };
     } catch (error) {
         console.error(error);
-        return 'Failed to update booking status.';
+        return { status:false, message:'Failed to update booking status.'};
     }
 }
 

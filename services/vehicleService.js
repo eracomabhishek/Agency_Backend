@@ -150,11 +150,12 @@ class VEHICLESERVICE {
     }
     
 
-    async   deleteVehicleService(vehicleId) {
+    async  deleteVehicleService(vehicleId) {
         try {
+            console.log("vehicle id", vehicleId)
             const deletedVehicle = await Vehicle.findOneAndDelete({ vehicleId });
             if (!deletedVehicle) {
-                return 'Vehicle not found.';
+                return { status: false , message:'Vehicle not found.'};
             }
             const updatedAgency = await Agency.findByIdAndUpdate(
                 deletedVehicle.agencyId, 
@@ -162,13 +163,13 @@ class VEHICLESERVICE {
                 { new: true } 
             );
             if (!updatedAgency) {
-                return 'Failed to update agency vehicle count.';
+                return { status: false, message:'Failed to update agency vehicle count.'};
             }
-        
-            return deletedVehicle;
+
+            return { status:true , message: 'Delete vehicle successfully' , data: deletedVehicle };
         } catch (error) {
-            console.error('Error deleting vehicle:', error);
-            return 'Failed to delete vehicle service.';
+            console.error(error);
+            return { status: false, message:'Failed to delete vehicle service.'};
         }
         
     }

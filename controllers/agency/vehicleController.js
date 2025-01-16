@@ -167,15 +167,12 @@ class VEHICLE {
             if (typeof deletedVehicle === "string") {
                 return res.status(404).json({ message: deletedVehicle });
             }
-           return res
-                .status(200)
-                .json({
-                    message: "Vehicle deleted successfully",
+           return res.status(200).json({ message: "Vehicle deleted successfully",
                     data: deletedVehicle,
                 });
         } catch (error) {
             console.error(error);
-            return res.status(400).json({ message: error.message });
+            return res.status(400).json({ message: 'Server error Vehicle not delete' });
         }
     }
 

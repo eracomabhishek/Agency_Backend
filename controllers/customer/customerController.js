@@ -84,7 +84,7 @@ class CUSTOMER {
             return res.status(200).json({ message: updatedCustomer.message,
                 data: updatedCustomer.data,
             });
-            
+
         } catch (error) {
             console.error('Profile update error:', error);
             return res.status(500).json({ message: 'Server error try again' });
@@ -112,16 +112,17 @@ class CUSTOMER {
 
     async getCustomerDetails(req, res) {
         try {
-          const customerId  = req.params.customerId;
+            const customerId = req.params.customerId
+               console.log('customerId ID in customer controller:', customerId);
           if(!customerId){
             return res.status(400).json({ message: 'customer id required'})
           }
           const findCustomer = await customerService.getCustomerDetailsService(customerId);
-          if (typeof findCustomer === 'string') {
-            return res.status(404).json({ message: findCustomer});
-          }
-          return res.status(200).json({ message: 'Details fetched successfully',
-             data: findCustomer, 
+            if (!findCustomer.status) {
+                return res.status(400).json({ message: findCustomer.message });
+            }
+            return res.status(200).json({ message: findCustomer.message,
+                                          data: findCustomer.data,
             });
         } catch (error) {
           console.error(error);

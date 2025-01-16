@@ -93,7 +93,7 @@ class BOOKING {
     // Update booking status
     async updateBookingStatus(req, res) {
         try {
-            const { bookingId } = req.params;
+            const bookingId  = req.params.bookingId;
             const { bookingStatus, paymentStatus } = req.body;
 
             if (bookingStatus === undefined && paymentStatus === undefined) {
@@ -101,15 +101,15 @@ class BOOKING {
                     message: 'At least one field bookingStatus or paymentStatus must be provided.',
                 });
             }
-            const updatedBooking = await bookingService.updateBookingStatusService(bookingId, req.body);
-            if ( typeof updatedBooking === 'string') {
-                return res.status(200).json({ message: updatedBooking });
+            const updatedBooking = await bookingService.updateBookingStatusService( Number(bookingId), req.body);
+            if (!updatedBooking.status) {
+                return res.status(400).json({ message: updatedBooking.message });
             }
 
-           return res.status(200).json({
-                message: 'Booking updated successfully',
-                data: updatedBooking,
+            return res.status(200).json({ message: updatedBooking.message,
+                data: updatedBooking.data,
             });
+
         } catch (error) {
            return res.status(500).json({
                 message: error.message,

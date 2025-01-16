@@ -14,6 +14,7 @@ router.get('/userdetails/:customerId', adminController.getUserDetails);
 router.get('/allcounts', adminController.getCounts);
 router.delete('/deleteuser', adminController.deleteUser);
 router.delete('/deleteagency', adminController.deleteAgency);
+router.delete('/deletevehicle/:vehicleId', adminController.deleteVehicle);
 router.put('/updateagency', adminController.updateAgencyProfile);
 router.put('/updateuser', adminController.updateUserProfile);
 

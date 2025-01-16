@@ -205,16 +205,16 @@ class CUSTOMERSERVICE {
 
   async getCustomerDetailsService(customerId) {
     try {
-      const findCustomer = await Customer.find({ customerId }).select(
-        "-password"
-      );
+               console.log("server in customer", customerId)
+      const findCustomer = await Customer.findOne({ customerId: customerId }).select("-password");
+               console.log("Query result:", findCustomer);
       if (!findCustomer) {
-        return "user not found";
+        return { status: false, message:"User not found" };
       }
-      return findCustomer;
+      return { status: true, message:'User details fetched successfully', data: findCustomer } 
     } catch (error) {
       console.error(error);
-      return "Server error";
+      return { status:false,  message:"Internal server error"};
     }
   }
 }
