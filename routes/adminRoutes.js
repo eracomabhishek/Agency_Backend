@@ -17,5 +17,6 @@ router.delete('/deleteagency', adminController.deleteAgency);
 router.delete('/deletevehicle/:vehicleId', adminController.deleteVehicle);
 router.put('/updateagency', adminController.updateAgencyProfile);
 router.put('/updateuser', adminController.updateUserProfile);
+router.get('/updatevehicle', adminController.updateVehicle);
 
 module.exports = router;

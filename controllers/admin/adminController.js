@@ -299,6 +299,36 @@ class ADMIN {
         }
     }
 
+    async updateVehicle(req, res) {
+        try {
+            const vehicleId = req.params.vehicleId;
+            const vehicle = await Vehicle.findOne({ vehicleId }); // Direct match for numeric vehicleId
+            if (!vehicle) {
+                return res.status(400).json({ message: "Vehicle not found." });
+            }
+            const updatedVehicle = await vehicleService.updateVehicleService(
+                vehicleId,
+                req.body,
+                req.files
+            );
+            if (typeof updatedVehicle === "string") {
+                return res.status(404).json({ message: updatedVehicle });
+            }
+
+            return res
+                .status(200)
+                .json({
+                    message: "Vehicle updated successfully",
+                    data: updatedVehicle,
+                });
+        } catch (error) {
+            console.error("Error updating vehicle:", error);
+            return res
+                .status(500)
+                .json({ message: "An error occurred while updating the vehicle." });
+        }
+    }
+
 }
 
 const adminController = new ADMIN();

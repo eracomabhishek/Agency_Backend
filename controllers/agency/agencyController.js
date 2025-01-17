@@ -57,6 +57,7 @@ class AGENCY {
             const payload = {
                 agencyId: agency.agencyId,
                 role: "agency",
+                status: agency.status
             };
 
             // Generate JWT token
